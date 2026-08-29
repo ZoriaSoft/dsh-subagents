@@ -1,0 +1,91 @@
+/** dsh-subagents — definition loader unit tests (no network, no dsh). */
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { loadDefinitions, parseDefinition, parseFrontmatter } from '../lib/definitions.js';
+
+const FULL = `---
+name: code-reviewer
+description: Reviews code for risks.
+model: bai/glm-5.3-flash
+tools: [bash, read]
+color: "#d9480f"
+---
+You are a meticulous code reviewer.
+`;
+
+test('parses scalars, inline lists and the body', () => {
+    const { attrs, body } = parseFrontmatter(FULL);
+    assert.equal(attrs.name, 'code-reviewer');
+    assert.equal(attrs.model, 'bai/glm-5.3-flash');
+    assert.deepEqual(attrs.tools, ['bash', 'read']);
+    assert.equal(attrs.color, '#d9480f');
+    assert.equal(body, 'You are a meticulous code reviewer.');
+});
+
+test('block lists with - items accumulate', () => {
+    const text = ['---', 'name: x', 'description: d', 'tools:', '  - bash', '  - read', '---', 'body'].join('\n');
+    const { attrs } = parseFrontmatter(text);
+    assert.deepEqual(attrs.tools, ['bash', 'read']);
+});
+
+test('quoted values are unquoted', () => {
+    const text = '---\nname: "quoted name"\ndescription: \'single\'\n---\nbody';
+    const { attrs } = parseFrontmatter(text);
+    assert.equal(attrs.name, 'quoted name');
+    assert.equal(attrs.description, 'single');
+});
+
+test('no frontmatter block returns null', () => {
+    assert.equal(parseFrontmatter('just body'), null);
+    assert.equal(parseFrontmatter('---\nunclosed: true\n'), null);
+});
+
+test('unknown keys are ignored but reported', () => {
+    const { def, diagnostics } = parseDefinition('a.md', '---\nname: a\ndescription: d\nthoughtLevel: high\n---\nbody');
+    assert.equal(def.name, 'a');
+    assert.ok(diagnostics.some((d) => d.includes('thoughtLevel')));
+});
+
+test('name and description are required', () => {
+    assert.equal(parseDefinition('a.md', '---\ndescription: d\n---\nbody').def, null);
+    assert.equal(parseDefinition('a.md', '---\nname: a\n---\nbody').def, null);
+});
+
+test('model and cli are mutually exclusive', () => {
+    const { def, diagnostics } = parseDefinition('a.md', '---\nname: a\ndescription: d\nmodel: bai/x\ncli: cmdc\n---\nbody');
+    assert.equal(def, null);
+    assert.ok(diagnostics.some((d) => d.includes('mutually exclusive')));
+});
+
+test('model inherit and malformed routes fall back to session model', () => {
+    const inherit = parseDefinition('a.md', '---\nname: a\ndescription: d\nmodel: inherit\n---\nbody');
+    assert.equal(inherit.def.model, undefined);
+    const bad = parseDefinition('a.md', '---\nname: a\ndescription: d\nmodel: just-a-name\n---\nbody');
+    assert.equal(bad.def.model, undefined);
+    assert.ok(bad.diagnostics.some((d) => d.includes('not provider/model')));
+});
+
+test('slug sanitization rejects empty results', () => {
+    const { def } = parseDefinition('a.md', '---\nname: "***"\ndescription: d\n---\nbody');
+    assert.equal(def, null);
+});
+
+test('loadDefinitions skips _disabled files and dedupes by name', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'dsh-subagents-'));
+    try {
+        await writeFile(join(dir, 'one.md'), FULL);
+        await writeFile(join(dir, '_disabled.md'), FULL.replace('code-reviewer', 'disabled-role'));
+        await writeFile(join(dir, 'two.md'), FULL.replace('code-reviewer', 'code-reviewer')); // same name
+        await writeFile(join(dir, 'three.md'), '---\nname: cli-role\ndescription: d\ncli: cmdc\n---\nbody');
+        const { agents, diagnostics } = await loadDefinitions(dir);
+        assert.deepEqual(agents.map((a) => a.slug), ['code-reviewer', 'cli-role']);
+        assert.equal(agents[1].cli, 'cmdc');
+        assert.ok(diagnostics.some((d) => d.includes('duplicate name')));
+    }
+    finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});

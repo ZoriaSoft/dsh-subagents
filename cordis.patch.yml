@@ -1,0 +1,16 @@
+# dsh-subagents bundle patch: mounts the host half into a profile.
+- insert:
+    - id: subagents
+      name: dsh-subagents
+      config:
+        # Where definition files live. Default: $DSH_HOME/agents.
+        # agentsDir: /absolute/path/to/agents
+        # Continuable subagent provider (dsh-subagent-spawn-in-process).
+        provider: spawn
+        # CLI-backed roles: subprocess timeout and output cap.
+        cliTimeoutMs: 300000
+        maxOutputChars: 12000
+        # Model-backed roles: tool-call timeout headroom.
+        modelTimeoutMs: 600000
+        # Self-heal rescan interval (also hot-reload safety net).
+        rescanMs: 15000
