@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] — 2026-08-30
+
+### Added
+- ZCode-parity management UI: two-pane manager with the roles list and a
+  New/Edit editor — name (live tool-name preview), color swatches, brain
+  selector (session model / dsh model / CLI), provider-grouped model picker
+  from the live catalog (156 models across 22 providers), tool allow-list
+  chips, system prompt, live definition-file preview, delete with confirm.
+- `POST /plugins/dsh-subagents/save` and `/delete` write/remove definition
+  files (`serializeDefinition` round-trips with the parser, unit-tested);
+  `GET /catalog` exposes providers, models and the supported CLIs;
+  `/debug` now includes each role's color, description, body and the global
+  available-tool list.
+
+### Changed
+- Panel redesign: settings-style rows with hover actions, refined spacing,
+  focus states and a sticky editor action bar.
+
 ## [0.3.0] — 2026-08-30
 
 ### Added

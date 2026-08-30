@@ -125,12 +125,15 @@ to the profile's packages (`dsh-tools`, `cordis`, `dsh-llm`); see
 
 ## Operations
 
-![The Subagents panel](docs/panel.png)
+![The Subagents manager](docs/panel.png)
 
-A sidebar launcher opens the **Subagents panel**: every role with its route
-badge, tool name and definition file, definition diagnostics, one-click test
-prompt copy, and enable/disable toggling (edits apply to the next turn via
-hot reload). In a dsh session, the `/agents` slash command lists the same.
+A sidebar launcher opens the **Subagents manager**: a roles list plus a
+ZCode-style New/Edit editor. Pick the role's brain from the live model
+catalog (a cheap route for routine work) or a CLI, choose its tool
+allow-list and system prompt, and see the definition file as you type.
+Roles can be created, edited, disabled and deleted entirely from the UI —
+files under `$DSH_HOME/agents/` remain the source of truth. In a dsh
+session, the `/agents` slash command lists the same roles.
 
 ```sh
 node --test                     # unit tests

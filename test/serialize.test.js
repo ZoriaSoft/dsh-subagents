@@ -34,7 +34,7 @@ test('serialize → parse round-trips every field', () => {
     for (const def of DEFS) {
         const text = serializeDefinition(def);
         const { def: back, diagnostics } = parseDefinition(`${def.name}.md`, text);
-        assert.equal(back, null, `parse failed: ${diagnostics.join('; ')}`);
+        assert.notEqual(back, null, `parse failed: ${diagnostics.join('; ')}`);
         assert.equal(back.name, def.name);
         assert.equal(back.description, def.description);
         assert.equal(back.model, def.model);
