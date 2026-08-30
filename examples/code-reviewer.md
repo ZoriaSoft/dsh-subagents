@@ -1,5 +1,5 @@
 ---
-name: reviewer
+name: code-reviewer
 description: Reviews code or a diff for bugs, edge cases, security issues and missing tests, ranked by severity with file:line citations. Cheap-model role for routine reviews before a human or the main agent looks.
 model: bai/glm-5.3-flash
 tools: [bash, read, grep, glob, skill]

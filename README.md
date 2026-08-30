@@ -101,22 +101,29 @@ a missing skill logs a warning and the role spawns without it.
 
 ### Bundled roster and skills
 
-`examples/` ships a curated production roster; `skills/` ships the role
-skills they rely on. All model-backed roles run on cheap routes, carry an
-explicit read/write-scoped tool allow-list (including `skill`, so a child
-can still load workspace skills at its own discretion), and inline
+`examples/` ships a nine-role master roster; `skills/` ships the playbooks
+they rely on. Planner and coder specialists run on a stronger route
+(`your-provider/strong-model`); scan/review roles on a cheap one
+(`bai/glm-5.3-flash`); `general-purpose` inherits the session model. Every
+role carries a scoped tool allow-list (including `skill`, so a child can
+still load workspace skills at its own discretion) and inlines
 `subagent-ground-rules` for a uniform low-model execution protocol.
 
 | Role file | Tool | Route | Skills |
 |---|---|---|---|
-| `researcher.md` | `agent_researcher` | pinned model | ground rules, evidence-research-protocol |
-| `reviewer.md` | `agent_reviewer` | cheap model | ground rules, code-review-checklist |
-| `test-writer.md` | `agent_test-writer` | cheap model | ground rules, test-writing-protocol |
-| `implementer.md` | `agent_implementer` | cheap model | ground rules, implementation-protocol |
-| `debugger.md` | `agent_debugger` | cheap model | ground rules, debug-triage-protocol |
-| `security-auditor.md` | `agent_security-auditor` | cheap model | ground rules, security-review-checklist |
-| `doc-writer.md` | `agent_doc-writer` | cheap model | ground rules, docs-writing-protocol |
-| `translator.md` | `agent_translator` | `cli: cmdc` | translation-protocol |
+| `general-purpose.md` | `agent_general_purpose` | inherits session | ground rules, general-purpose-playbook |
+| `explorer.md` | `agent_explorer` | cheap model | ground rules, codebase-exploration |
+| `aso-specialist.md` | `agent_aso_specialist` | planner model | ground rules, aso-playbook |
+| `backend-cloudflare.md` | `agent_backend_cloudflare` | planner model | ground rules, cloudflare-backend-playbook |
+| `code-reviewer.md` | `agent_code_reviewer` | cheap model | ground rules, code-review-checklist |
+| `flutter-dev.md` | `agent_flutter_dev` | planner model | ground rules, flutter-dev-playbook |
+| `orchestrator.md` | `agent_orchestrator` | planner model | ground rules, orchestration-playbook |
+| `security-auditor.md` | `agent_security_auditor` | cheap model | ground rules, security-review-checklist |
+| `ui-designer.md` | `agent_ui_designer` | cheap model | ground rules, ui-design-playbook |
+
+The `orchestrator` plans and returns an executable assignment plan; the
+primary agent then sends the prompts it produces to the other `agent_*`
+roles. It does not run the work itself.
 
 ## Definition file reference
 

@@ -4,6 +4,36 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] — 2026-08-30
+
+### Changed (breaking — roster redesign)
+- **Bundled roster replaced** with a nine-role master roster; the previous
+  eight roles (researcher, reviewer, test-writer, implementer, debugger,
+  doc-writer, translator and the CLI-backed example) are retired. Roles
+  kept/renamed: `code-reviewer` (ex reviewer), `security-auditor`.
+  New roles: `general-purpose` (inherit route, full toolkit),
+  `explorer` (read-only codebase mapping), `aso-specialist` (evidence-backed
+  ASO with `web_search`), `backend-cloudflare` (Workers/D1/KV/R2 + deploy
+  discipline), `flutter-dev` (Zoria stack pins), `orchestrator` (planning
+  conductor returning an executable assignment plan) and `ui-designer`
+  (design spec / ThemeData / review under the Zoria visual DNA, with
+  `modlens_read_image`).
+- Skill routes tightened: planner/coder specialists (`orchestrator`,
+  `aso-specialist`, `backend-cloudflare`, `flutter-dev`) run on
+  `your-provider/strong-model`; scan/review roles stay on
+  `bai/glm-5.3-flash`; `general-purpose` inherits the session model.
+- Skill bundle reshaped to match: 6 single-role protocols retired; 7 new
+  playbooks added (`general-purpose-playbook`, `codebase-exploration`,
+  `aso-playbook`, `cloudflare-backend-playbook`, `flutter-dev-playbook`,
+  `orchestration-playbook`, `ui-design-playbook`) alongside
+  `subagent-ground-rules`, `code-review-checklist` and
+  `security-review-checklist`.
+
+### Added
+- `test/roster.test.js` — roster integrity in CI: every example role parses
+  clean, every role-referenced skill resolves under `skills/`, every bundled
+  skill file parses with a non-empty body.
+
 ## [0.5.0] — 2026-08-30
 
 ### Added
