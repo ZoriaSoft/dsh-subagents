@@ -8,6 +8,7 @@
     ".": "./lib/index.js",
     "./definitions": "./lib/definitions.js",
     "./runner": "./lib/runner.js",
+    "./skills": "./lib/skills.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json",
     "./client": "./lib/client.js"
@@ -15,6 +16,7 @@
   "files": [
     "lib",
     "examples",
+    "skills",
     "cordis.patch.yml",
     "README.md",
     "LICENSE",

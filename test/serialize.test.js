@@ -24,6 +24,14 @@ const DEFS = [
         body: 'Research with evidence.',
     },
     {
+        name: 'security-auditor',
+        description: 'Audits code.',
+        model: 'bai/glm-5.3-flash',
+        disallowedTools: ['write', 'edit'],
+        skills: ['subagent-ground-rules', 'security-review-checklist'],
+        body: 'You are an auditor.',
+    },
+    {
         name: 'minimal',
         description: 'd',
         body: 'b',
@@ -41,8 +49,15 @@ test('serialize → parse round-trips every field', () => {
         assert.equal(back.cli, def.cli);
         assert.deepEqual(back.tools, def.tools);
         assert.deepEqual(back.disallowedTools, def.disallowedTools);
+        assert.deepEqual(back.skills, def.skills);
         assert.equal(back.body, def.body);
     }
+});
+
+test('skills and disallowedTools serialize as inline lists', () => {
+    const text = serializeDefinition(DEFS[3]);
+    assert.match(text, /^skills: \[subagent-ground-rules, security-review-checklist\]$/m);
+    assert.match(text, /^disallowedTools: \[write, edit\]$/m);
 });
 
 test('single-line description stays inline', () => {

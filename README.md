@@ -101,6 +101,25 @@ is parsed and stripped). Resolution order: `skillsDirs` entries first (default
 overrides a bundled skill. Editing a skill file applies to the very next spawn;
 a missing skill logs a warning and the role spawns without it.
 
+### Bundled roster and skills
+
+`examples/` ships a curated production roster; `skills/` ships the role
+skills they rely on. All model-backed roles run on cheap routes, carry an
+explicit read/write-scoped tool allow-list (including `skill`, so a child
+can still load workspace skills at its own discretion), and inline
+`subagent-ground-rules` for a uniform low-model execution protocol.
+
+| Role file | Tool | Route | Skills |
+|---|---|---|---|
+| `researcher.md` | `agent_researcher` | pinned model | ground rules, evidence-research-protocol |
+| `reviewer.md` | `agent_reviewer` | cheap model | ground rules, code-review-checklist |
+| `test-writer.md` | `agent_test-writer` | cheap model | ground rules, test-writing-protocol |
+| `implementer.md` | `agent_implementer` | cheap model | ground rules, implementation-protocol |
+| `debugger.md` | `agent_debugger` | cheap model | ground rules, debug-triage-protocol |
+| `security-auditor.md` | `agent_security-auditor` | cheap model | ground rules, security-review-checklist |
+| `doc-writer.md` | `agent_doc-writer` | cheap model | ground rules, docs-writing-protocol |
+| `translator.md` | `agent_translator` | `cli: cmdc` | translation-protocol |
+
 ## Definition file reference
 
 Markdown with frontmatter; the body is the role's system prompt. Keys are camelCase and
@@ -126,7 +145,7 @@ ZCode keys with no dsh-runtime counterpart (`thoughtLevel`, `maxTurns`, `injectA
 ```sh
 dsh plugin --profile web add link:/path/to/dsh-subagents
 supervisorctl restart dsh-web        # host half loads at boot; sessions drop
-mkdir -p ~/.dsh/agents && cp examples/*.md ~/.dsh/agents/
+bash scripts/install-roster.sh       # roles → ~/.dsh/agents, skills → ~/.dsh/subagent-skills
 ```
 
 Or install from npm when published: `dsh plugin --profile web add dsh-subagents`.

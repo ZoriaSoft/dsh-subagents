@@ -11,13 +11,30 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   spawn time and inlined into the child persona — deterministic preload for
   cheap models, zero pollution of the calling session's skill catalog.
   Resolution: `skillsDirs` config (default `$DSH_HOME/subagent-skills`) wins
-  over the plugin-bundled `skills/`; bundled `subagent-ground-rules` ships as
-  an example. Missing skills warn and spawn without.
+  over the plugin-bundled `skills/`; missing skills warn and spawn without.
+- Curated bundled roster (8 roles) + 9 role skills: researcher, reviewer,
+  test-writer, implementer, debugger, security-auditor, doc-writer and the
+  CLI-backed translator — each with a scoped tool allow-list (including
+  `skill`), severity-ranked output contracts, UNVERIFIED honesty rules and
+  the shared `subagent-ground-rules` protocol for low-capability models.
+- `scripts/install-roster.sh` — idempotent install of roles and skills into
+  a DSH home.
+- `/debug` now reports `skillsDirs` and per-role `skills`; the manager UI
+  shows a skills count per role and a comma-separated skills field in the
+  editor (round-trips through `/save` with kebab-case validation).
 
 ### Changed
 - Hot-reload reconciliation now compares content signatures instead of object
   identity (`definitionSignature`): unchanged definitions are never pointlessly
   re-registered on rescans.
+- `/debug` `availableTools` lists every registered tool (`knownNames`), not
+  only the calling context's visible subset, and no longer hardcodes hiding
+  `run_code`.
+- `model: inherit` roles round-trip correctly through the manager UI: `/debug`
+  emits an empty `route` for inherit (plus a human `routeLabel`), so editing
+  an inherit role no longer posts the invalid literal route string.
+- `parseRoute` keeps splitting `provider/model` on the FIRST slash — nested
+  model ids (`your-provider/strong-model`) are the verified catalog shape.
 
 ## [0.4.0] — 2026-08-30
 

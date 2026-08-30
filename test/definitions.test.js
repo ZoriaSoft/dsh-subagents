@@ -93,6 +93,15 @@ test('slug sanitization rejects empty results', () => {
     assert.equal(def, null);
 });
 
+test('skills frontmatter parses as an inline or block list', () => {
+    const inline = parseDefinition('a.md', '---\nname: a\ndescription: d\nskills: [one-skill, two-skill]\n---\nbody');
+    assert.deepEqual(inline.def.skills, ['one-skill', 'two-skill']);
+    const block = parseDefinition('a.md', ['---', 'name: a', 'description: d', 'skills:', '  - one-skill', '  - two-skill', '---', 'body'].join('\n'));
+    assert.deepEqual(block.def.skills, ['one-skill', 'two-skill']);
+    const none = parseDefinition('a.md', '---\nname: a\ndescription: d\n---\nbody');
+    assert.equal(none.def.skills, undefined);
+});
+
 test('loadDefinitions skips _disabled files and dedupes by name', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'dsh-subagents-'));
     try {

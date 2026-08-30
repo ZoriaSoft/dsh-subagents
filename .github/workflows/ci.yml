@@ -18,6 +18,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Syntax check
-        run: node --check lib/index.js lib/definitions.js lib/runner.js lib/reconcile.js
+        run: node --check lib/index.js lib/definitions.js lib/runner.js lib/reconcile.js lib/skills.js lib/client.js
       - name: Unit tests
         run: node --test
