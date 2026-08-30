@@ -45,6 +45,27 @@ test('empty cliModel adds no flag', () => {
     assert.deepEqual(buildCliArgv('agy', 'p', undefined, ''), ['agy', '--disable-slash-commands', '-p', 'p']);
 });
 
+test('cliEffort is passed through the CLI effort flag', () => {
+    assert.deepEqual(buildCliArgv('agy', 'p', undefined, 'gemini-2.5-flash', 'high'),
+        ['agy', '--disable-slash-commands', '--model', 'gemini-2.5-flash', '--effort', 'high', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('cmdc', 'p', undefined, undefined, 'medium'),
+        ['cmdc', '--no-session', '--effort', 'medium', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('pi', 'p', undefined, 'bai/glm-5.3-flash', 'xhigh'),
+        ['pi', '--no-session', '--model', 'bai/glm-5.3-flash', '--thinking', 'xhigh', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('claude', 'p', undefined, 'sonnet', 'max'),
+        ['claude', '--model', 'sonnet', '--effort', 'max', '-p', 'p']);
+});
+
+test('dsh headless ignores a cliEffort it cannot deliver', () => {
+    assert.deepEqual(buildCliArgv('dsh', 'p', undefined, undefined, 'high'),
+        ['dsh', '--profile', 'headless', 'p']);
+});
+
+test('empty cliEffort adds no flag', () => {
+    assert.deepEqual(buildCliArgv('agy', 'p', undefined, 'gemini-2.5-flash', ''),
+        ['agy', '--disable-slash-commands', '--model', 'gemini-2.5-flash', '-p', 'p']);
+});
+
 test('unknown cli fails loudly', () => {
     assert.throws(() => buildCliArgv('nope', 'p'), /unknown cli/);
 });

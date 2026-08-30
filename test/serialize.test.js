@@ -16,6 +16,8 @@ const DEFS = [
         name: 'translator',
         description: 'Translates texts.\nSecond line of description.',
         cli: 'cmdc',
+        cliModel: 'glm-5.3',
+        cliEffort: 'high',
         body: 'Translate exactly.',
     },
     {
@@ -47,6 +49,8 @@ test('serialize → parse round-trips every field', () => {
         assert.equal(back.description, def.description);
         assert.equal(back.model, def.model);
         assert.equal(back.cli, def.cli);
+        assert.equal(back.cliModel, def.cliModel);
+        assert.equal(back.cliEffort, def.cliEffort);
         assert.deepEqual(back.tools, def.tools);
         assert.deepEqual(back.disallowedTools, def.disallowedTools);
         assert.deepEqual(back.skills, def.skills);
@@ -71,4 +75,11 @@ test('multiline description becomes a literal block', () => {
 
 test('color is quoted so the # is preserved', () => {
     assert.match(serializeDefinition(DEFS[0]), /^color: "#d9480f"$/m);
+});
+
+test('cliModel and cliEffort serialize next to cli', () => {
+    const text = serializeDefinition(DEFS[1]);
+    assert.match(text, /^cli: cmdc$/m);
+    assert.match(text, /^cliModel: glm-5.3$/m);
+    assert.match(text, /^cliEffort: high$/m);
 });

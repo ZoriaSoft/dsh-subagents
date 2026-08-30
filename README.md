@@ -56,25 +56,29 @@ child whose result arrives later as a notice while you keep working.
 ---
 name: translator
 description: Translates or polishes short texts (TR/EN) through a free external CLI.
-cli: cmdc
+cli: agy
+cliModel: gemini-3.7-flash-low
+cliEffort: low
 ---
 Translate or rewrite the given text as instructed by the task prompt.
 ```
 
-The role runs `cmdc --no-session -p "<task>"` in a shell-less subprocess and the tool
-call returns its output — like a bash call with a brain you chose. The definition body
-is delivered as the role's system prompt where the CLI supports one:
+The role runs the CLI in a shell-less subprocess and the tool call returns its
+output — like a bash call with a brain you chose. The definition body is
+delivered as the role's system prompt where the CLI supports one.
 
-A CLI role can also pin the CLI's own model (`cliModel:`) — passed through the
-CLI's `--model` flag (`dsh` headless is profile-bound and does not support it):
+A CLI role can pin the CLI's own model (`cliModel:`) and reasoning effort
+(`cliEffort:`). The manager editor loads both from the live CLI catalog —
+pick a model from the list, pick an effort, see them on the role badge.
+`dsh` headless is profile-bound and supports neither.
 
-| `cli:`   | headless invocation                                        | model flag    | definition body delivered as |
-|----------|------------------------------------------------------------|---------------|------------------------------|
-| `cmdc`   | `cmdc --no-session -p <task>`                              | `--model`     | embedded role instructions   |
-| `pi`     | `pi --no-session -p <task>`                                | `--model`     | `--append-system-prompt`     |
-| `agy`    | `agy --disable-slash-commands -p <task>`                   | `--model`     | embedded role instructions   |
-| `claude` | `claude -p <task>`                                         | `--model`     | `--append-system-prompt`     |
-| `dsh`    | `dsh --profile headless <task>`                            | —             | not deliverable (documented) |
+| `cli:`   | headless invocation                                        | model flag    | effort flag     | definition body delivered as |
+|----------|------------------------------------------------------------|---------------|-----------------|------------------------------|
+| `cmdc`   | `cmdc --no-session -p <task>`                              | `--model`     | `--effort`      | embedded role instructions   |
+| `pi`     | `pi --no-session -p <task>`                                | `--model`     | `--thinking`    | `--append-system-prompt`     |
+| `agy`    | `agy --disable-slash-commands -p <task>`                   | `--model`     | `--effort`      | embedded role instructions   |
+| `claude` | `claude -p <task>`                                         | `--model`     | `--effort`      | `--append-system-prompt`     |
+| `dsh`    | `dsh --profile headless <task>`                            | —             | —               | not deliverable (documented) |
 
 CLI roles are always foreground and share a configurable concurrency cap
 (`maxConcurrentCli`, default 3). Each CLI must be on `PATH`.
@@ -141,6 +145,7 @@ starts with `_` is disabled.
 | `model`            | `provider/model`, or `inherit` / omitted to follow the calling session.     |
 | `cli`              | Run through an external CLI instead of a dsh model. Mutually exclusive with `model`. |
 | `cliModel`         | The CLI's own model id, passed via its `--model` flag. Requires `cli`. |
+| `cliEffort`        | Reasoning effort (`low` / `medium` / `high`, plus CLI-specific extras). Requires `cli`. |
 | `tools`            | Exhaustive allow-list of tool names (omit for all). Unknown names are dropped with a warning; an allow-list matching nothing fails the call loudly. |
 | `disallowedTools`  | Deny-list of tool names.                                                    |
 | `skills`           | Role skill names (see [Role skills](#role-skills)) — resolved and inlined into the persona at spawn time. |
@@ -178,8 +183,9 @@ to the profile's packages (`dsh-tools`, `cordis`, `dsh-llm`); see
 ## Operations
 
 A sidebar launcher opens the **Subagents manager**: a roles list plus a
-ZCode-style New/Edit editor. Pick the role's brain from the live model
-catalog (a cheap route for routine work) or a CLI, choose its tool
+ZCode-style New/Edit editor. Pick the role's brain from the live dsh model
+catalog (a cheap route for routine work) or a CLI — CLI roles load that
+CLI's live model list and effort levels automatically — choose its tool
 allow-list and system prompt, and see the definition file as you type.
 Roles can be created, edited, disabled and deleted entirely from the UI —
 files under `$DSH_HOME/agents/` remain the source of truth. In a dsh

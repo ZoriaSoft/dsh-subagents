@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] — 2026-08-30
+
+### Added
+- Live CLI model catalog: the manager editor lists each CLI's current models
+  (`cmdc --list-models`, `pi --list-models`, `agy models`, claude aliases)
+  as a visible select, plus a reasoning-effort select (`cliEffort`, mapped to
+  `--effort` / pi `--thinking`). The role list badge shows `cli · model · effort`.
+- `cliEffort` definition field, `/save` validation and `/debug` round-trip.
+
+### Fixed
+- CLI model listings no longer hang: listings run with stdin ignored so CLIs
+  that wait on a piped stdin (agy) cannot stall `/catalog`.
+
 ## [0.7.0] — 2026-08-30
 
 ### Added

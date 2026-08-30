@@ -96,6 +96,14 @@ test('cliModel rides with cli and is ignored without it', () => {
     assert.ok(without.diagnostics.some((x) => x.includes('cliModel')));
 });
 
+test('cliEffort rides with cli and is ignored without it', () => {
+    const withCli = parseDefinition('a.md', '---\nname: a\ndescription: d\ncli: cmdc\ncliEffort: high\n---\nbody');
+    assert.equal(withCli.def.cliEffort, 'high');
+    const without = parseDefinition('a.md', '---\nname: a\ndescription: d\ncliEffort: high\n---\nbody');
+    assert.equal(without.def.cliEffort, undefined);
+    assert.ok(without.diagnostics.some((x) => x.includes('cliEffort')));
+});
+
 test('slug sanitization rejects empty results', () => {
     const { def } = parseDefinition('a.md', '---\nname: "***"\ndescription: d\n---\nbody');
     assert.equal(def, null);
