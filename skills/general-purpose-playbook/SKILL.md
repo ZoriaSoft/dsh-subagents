@@ -18,7 +18,7 @@ so you do the work directly, carefully.
 If the task really needs a specialist you cannot replace (deep security
 audit, full design system), say so in the report instead of improvising.
 
-## Implementation mode (code changes)
+## Step 2 — Implement (code-change tasks)
 
 1. Read the file(s) you will touch plus one neighbor for conventions.
 2. Make the SMALLEST change that satisfies the task. No refactors, renames,
@@ -27,13 +27,13 @@ audit, full design system), say so in the report instead of improvising.
 4. Verify: syntax check (`node --check`, `tsc --noEmit`, `flutter analyze`)
    or run the relevant test. Report the REAL outcome of what you ran.
 
-## Step 2 — Verify
+## Step 3 — Verify
 
 - Re-read your own diff before reporting. Does every change serve the task?
 - If verification fails, fix and re-verify once. Still failing → report
   honestly with the error.
 
-## Step 3 — Report
+## Step 4 — Report
 
 1. **Done** — one line per file: `path — what changed`.
 2. **Verify** — each check you ran and its real outcome.

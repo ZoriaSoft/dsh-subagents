@@ -48,9 +48,13 @@ color: "#d9480f"
 You are a code review subagent…
 ```
 
-Foreground by default: several `agent_*` calls in one turn run in parallel and the
-results come back as tool results. Pass `run_in_background: true` for a continuable
-child whose result arrives later as a notice while you keep working.
+**Background by default.** A model-backed role runs without blocking the chat: the
+tool call returns one "launched" line, the result arrives as a notice when the child
+settles, and the Subagents panel shows live progress (role, task, elapsed, result).
+Precedence: the tool call's `run_in_background` argument > the role's `background:`
+frontmatter > the default. Add `background: false` to a role to make it wait for the
+result again. Several background calls in one turn run in parallel; CLI-backed roles
+always run in the foreground.
 
 ### CLI-backed roles (extension)
 
@@ -83,7 +87,9 @@ pick a model from the list, pick an effort, see them on the role badge.
 | `dsh`    | `dsh --profile headless <task>`                            | —             | —               | not deliverable (documented) |
 
 CLI roles are always foreground and share a configurable concurrency cap
-(`maxConcurrentCli`, default 3). Each CLI must be on `PATH`.
+(`maxConcurrentCli`, default 3). Each CLI must be on `PATH`. A role's `tools:`
+allow-list applies to model-backed routes only — a CLI child is constrained by the
+CLI's own toolset, so state restrictions in the role body for CLI roles.
 
 > **Thinking models and `--effort`:** some CLI models reject the effort flag
 > outright — notably agy's thinking variants (`claude-opus-4-6-thinking`,
@@ -119,24 +125,26 @@ a missing skill logs a warning and the role spawns without it.
 ### Bundled roster and skills
 
 `examples/` ships a nine-role master roster; `skills/` ships the playbooks
-they rely on. Planner and coder specialists run on a stronger route
-(`your-provider/strong-model`); scan/review roles on a cheap one
-(`bai/glm-5.3-flash`); `general-purpose` inherits the session model. Every
-role carries a scoped tool allow-list (including `skill`, so a child can
-still load workspace skills at its own discretion) and inlines
-`subagent-ground-rules` for a uniform low-model execution protocol.
+they rely on. As shipped, every role is CLI-backed and runs through
+`agy` on `gemini-3.7-flash-medium` (medium effort); `ui-designer` uses the
+thinking model `claude-opus-4-6-thinking` and pins no effort (thinking
+variants reject `--effort`). Swap any role to a model route
+(`model: provider/model` or `inherit`) if you would rather keep it in dsh.
+Every role lists its intended toolset — informational on CLI routes, where
+the CLI's own permission model applies — and inlines
+`subagent-ground-rules` for a uniform execution protocol.
 
-| Role file | Tool | Route | Skills |
+| Role file | Tool | Route (as shipped) | Skills |
 |---|---|---|---|
-| `general-purpose.md` | `agent_general_purpose` | inherits session | ground rules, general-purpose-playbook |
-| `explorer.md` | `agent_explorer` | cheap model | ground rules, codebase-exploration |
-| `aso-specialist.md` | `agent_aso_specialist` | planner model | ground rules, aso-playbook |
-| `backend-cloudflare.md` | `agent_backend_cloudflare` | planner model | ground rules, cloudflare-backend-playbook |
-| `code-reviewer.md` | `agent_code_reviewer` | cheap model | ground rules, code-review-checklist |
-| `flutter-dev.md` | `agent_flutter_dev` | planner model | ground rules, flutter-dev-playbook |
-| `orchestrator.md` | `agent_orchestrator` | planner model | ground rules, orchestration-playbook |
-| `security-auditor.md` | `agent_security_auditor` | cheap model | ground rules, security-review-checklist |
-| `ui-designer.md` | `agent_ui_designer` | cheap model | ground rules, ui-design-playbook |
+| `general-purpose.md` | `agent_general_purpose` | cli: agy · gemini-3.7-flash-medium · medium | ground rules, general-purpose-playbook |
+| `explorer.md` | `agent_explorer` | cli: agy · gemini-3.7-flash-medium · medium | ground rules, codebase-exploration |
+| `aso-specialist.md` | `agent_aso_specialist` | cli: agy · gemini-3.7-flash-medium · medium | ground rules, aso-playbook |
+| `backend-cloudflare.md` | `agent_backend_cloudflare` | cli: agy · gemini-3.7-flash-medium · medium | ground rules, cloudflare-backend-playbook |
+| `code-reviewer.md` | `agent_code_reviewer` | cli: agy · gemini-3.7-flash-medium · medium | ground rules, code-review-checklist |
+| `flutter-dev.md` | `agent_flutter_dev` | cli: agy · gemini-3.7-flash-medium · medium | ground rules, flutter-dev-playbook |
+| `orchestrator.md` | `agent_orchestrator` | cli: agy · gemini-3.7-flash-medium · medium | ground rules, orchestration-playbook |
+| `security-auditor.md` | `agent_security_auditor` | cli: agy · gemini-3.7-flash-medium · medium | ground rules, security-review-checklist |
+| `ui-designer.md` | `agent_ui_designer` | cli: agy · claude-opus-4-6-thinking | ground rules, ui-design-playbook |
 
 The `orchestrator` plans and returns an executable assignment plan; the
 primary agent then sends the prompts it produces to the other `agent_*`
@@ -156,6 +164,7 @@ starts with `_` is disabled.
 | `cli`              | Run through an external CLI instead of a dsh model. Mutually exclusive with `model`. |
 | `cliModel`         | The CLI's own model id, passed via its `--model` flag. Requires `cli`. |
 | `cliEffort`        | Reasoning effort (`low` / `medium` / `high`, plus CLI-specific extras). Requires `cli`. |
+| `background`       | Model-backed roles only: `true` / `false` pins the run mode. Default is background; the tool call's `run_in_background` argument overrides this key. CLI roles are always foreground. |
 | `tools`            | Exhaustive allow-list of tool names (omit for all). Unknown names are dropped with a warning; an allow-list matching nothing fails the call loudly. |
 | `disallowedTools`  | Deny-list of tool names.                                                    |
 | `skills`           | Role skill names (see [Role skills](#role-skills)) — resolved and inlined into the persona at spawn time. |
@@ -173,6 +182,9 @@ bash scripts/install-roster.sh       # roles → ~/.dsh/agents, skills → ~/.ds
 ```
 
 Or install from npm when published: `dsh plugin --profile web add dsh-subagents`.
+
+`scripts/install-roster.sh` never overwrites a role file that already exists — your
+local customizations win. Pass `--force` to replace them.
 
 `link:` installs need the plugin's `node_modules/@deepseek-ai/<peer>` entries to resolve
 to the profile's packages (`dsh-tools`, `cordis`, `dsh-llm`); see
@@ -201,15 +213,23 @@ Roles can be created, edited, disabled and deleted entirely from the UI —
 files under `$DSH_HOME/agents/` remain the source of truth. In a dsh
 session, the `/agents` slash command lists the same roles.
 
+The manager also carries a live **Activity rail**: running subagents (role,
+task, elapsed) and recent finishes (✓/✗ with a result preview), polled every
+2 s while the panel is open. While anything runs, a corner chip
+(`N subagents running`) floats bottom-right across dsh and opens the panel
+on click.
+
 ```sh
 node --test                     # unit tests
 bash scripts/smoke.sh           # tests + live debug route (default 127.0.0.1:3080)
-curl -s localhost:3080/plugins/dsh-subagents/debug   # roles, tools, diagnostics
+curl -s localhost:3080/plugins/dsh-subagents/debug     # roles, tools, diagnostics
+curl -s localhost:3080/plugins/dsh-subagents/activity  # running + recent runs + CLI queue
 ```
 
 The debug route lists loaded roles, registered `agent_*` tools and per-file diagnostics
-(missing keys, bad routes, duplicates). Host-half changes need a `dsh-web` restart;
-definition-file changes do not.
+(missing keys, bad routes, duplicates); the activity route exposes the run
+ledger (running entries, last 20 finished, CLI semaphore depth). Host-half
+changes need a `dsh-web` restart; definition-file changes do not.
 
 ## Architecture decisions
 
@@ -251,8 +271,11 @@ node --test                 # parser, argv map, sanitization
 node --check lib/*.js
 ```
 
-Layout: `lib/definitions.js` (frontmatter + validation), `lib/runner.js` (model/CLI
-execution), `lib/index.js` (tool registration, hot reload, debug route). Verified
+Layout: `lib/definitions.js` (frontmatter + validation), `lib/skills.js`
+(role-skill resolution), `lib/reconcile.js` (registration reconciliation),
+`lib/runner.js` (model/CLI execution), `lib/climodels.js` (live CLI model
+catalog), `lib/index.js` (tool registration, hot reload, ops routes),
+`lib/client.js` (manager UI module). Verified
 against dsh `0.1.1-rc.2`; re-run the smoke after upgrading dsh.
 
 ## Changelog

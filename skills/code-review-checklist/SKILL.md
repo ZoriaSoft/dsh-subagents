@@ -5,6 +5,8 @@ description: Structured code-review checklist with severity ranking and a fixed 
 
 # Code review checklist
 
+Scope: routine pass on every change (the security-auditor's checklist is the release-gate deep scan; run that for security-sensitive diffs).
+
 Review the change you were given. If you were given a diff, read it line by
 line. If you were given files, read the parts the task names. Work through
 the checklist in order — do not jump to conclusions before reading.

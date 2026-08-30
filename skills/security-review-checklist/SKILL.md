@@ -5,6 +5,8 @@ description: Security review checklist for subagents — concrete vulnerability 
 
 # Security review checklist
 
+Scope: release-gate deep scan (the code-reviewer's checklist is the routine pass; this one is the gate).
+
 Review the given code/diff for concrete, demonstrable security issues. You
 are looking for real vulnerabilities, not style warnings.
 
@@ -19,6 +21,7 @@ are looking for real vulnerabilities, not style warnings.
    server-side validation on client-declared values.
 4. **Cryptography** — Math.random() for tokens/ids, MD5/SHA1 for
    passwords, non-constant-time comparison of secrets, weak KDF
+-   Dart/Flutter: `Random` instead of `Random.secure` for tokens; `md5`/`sha1` from package:crypto for passwords; missing `PBKDF2` iteration caps.
    iterations.
 5. **Transport** — cleartext http:// for non-asset traffic, TLS
    verification disabled.

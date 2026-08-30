@@ -31,7 +31,7 @@ must be added.
 ## Step 3 — Verify locally
 
 - `node --check`/`tsc` for syntax.
-- `wrangler dev --local` smoke if the task allows a local run.
+- `wrangler dev (local by default in wrangler v4)` smoke if the task allows a local run.
 - Read your diff for the cache-invalidation and secret rules above.
 
 ## Step 4 — Deploy

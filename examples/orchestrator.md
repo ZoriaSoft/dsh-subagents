@@ -1,8 +1,10 @@
 ---
 name: orchestrator
 description: Planning conductor — decomposes a complex task into a dependency-ordered plan of subagent assignments (which agent_* role gets which ready-to-send standalone prompt, what runs in parallel, what verifies what). Returns the plan for the primary agent to execute; does not run the work itself. Use before fanning out multi-step or multi-role work.
-model: your-provider/strong-model
-tools: [bash, read, grep, glob, skill]
+cli: agy
+cliModel: gemini-3.7-flash-medium
+cliEffort: medium
+tools: [bash, read, grep, glob, skill] # model routes only (CLI roles: restrict via the CLI itself)
 skills: [subagent-ground-rules, orchestration-playbook]
 color: "#6b7280"
 ---

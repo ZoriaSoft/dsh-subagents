@@ -1,8 +1,10 @@
 ---
 name: general-purpose
 description: General-purpose worker for any self-contained task that does not need a named specialist — research, small code changes, file edits, scaffolding, quick fixes, docs, data transformations. Give it the full task context; it classifies, acts, verifies and reports.
-model: inherit
-tools: [bash, read, write, edit, grep, glob, skill]
+cli: agy
+cliModel: gemini-3.7-flash-medium
+cliEffort: medium
+tools: [bash, read, write, edit, grep, glob, skill] # model routes only (CLI roles: restrict via the CLI itself)
 skills: [subagent-ground-rules, general-purpose-playbook]
 color: "#1f6feb"
 ---

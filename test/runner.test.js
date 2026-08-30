@@ -1,7 +1,7 @@
 /** dsh-subagents — runner unit tests (argv map, sanitization, output shaping). */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCliArgv, isEffortUnsupportedError, messageText, parseRoute, personaText, sanitizeToolFilter, Semaphore } from '../lib/runner.js';
+import { buildCliArgv, isEffortUnsupportedError, messageText, parseRoute, personaText, sanitizeToolFilter, resolveRunMode, Semaphore } from '../lib/runner.js';
 
 test('cli argv uses verified headless flags', () => {
     assert.deepEqual(buildCliArgv('cmdc', 'p'), ['cmdc', '--no-session', '-p', 'p']);
@@ -74,6 +74,23 @@ test('isEffortUnsupportedError matches the thinking-model rejection, nothing els
     assert.equal(isEffortUnsupportedError({ code: 1, stderr: 'Error: model not found' }), false);
     assert.equal(isEffortUnsupportedError(undefined), false);
     assert.equal(isEffortUnsupportedError(''), false);
+});
+
+test('resolveRunMode precedence: args > frontmatter > default', () => {
+    const modelRole = { name: 'a' };                     // model-backed
+    const cliRole = { name: 'a', cli: 'agy' };           // CLI-backed
+    const optOut = { name: 'a', background: false };     // model-backed, opt-out
+    const optIn = { name: 'a', background: true };
+    // explicit argument wins
+    assert.equal(resolveRunMode(modelRole, { run_in_background: true }), 'background');
+    assert.equal(resolveRunMode(optIn, { run_in_background: false }), 'foreground');
+    // frontmatter next
+    assert.equal(resolveRunMode(optOut, {}), 'foreground');
+    assert.equal(resolveRunMode(optIn, {}), 'background');
+    // default: model-backed background, CLI always foreground
+    assert.equal(resolveRunMode(modelRole, {}), 'background');
+    assert.equal(resolveRunMode(cliRole, {}), 'foreground');
+    assert.equal(resolveRunMode(cliRole, { run_in_background: true }), 'foreground');
 });
 
 test('unknown cli fails loudly', () => {

@@ -1,8 +1,10 @@
 ---
 name: flutter-dev
 description: Flutter/Dart implementation specialist on the Zoria stack (Flutter >=3.44, Riverpod 3.x, GoRouter ^17) — widgets, controllers, navigation, data layers, fixes and small features, delivered analyze-clean with tests where a runner exists. Use for Dart/Flutter code changes.
-model: your-provider/strong-model
-tools: [bash, read, write, edit, grep, glob, skill]
+cli: agy
+cliModel: gemini-3.7-flash-medium
+cliEffort: medium
+tools: [bash, read, write, edit, grep, glob, skill] # model routes only (CLI roles: restrict via the CLI itself)
 skills: [subagent-ground-rules, flutter-dev-playbook]
 color: "#0b7285"
 ---

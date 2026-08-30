@@ -29,7 +29,7 @@ A landing page is BRAND register. Treating it with product-register reflexes
   serif, health = white-teal. If your direction can be guessed from
   "hosting/dev/SaaS", rebuild it. (Yes: dark-charcoal + amber + monospace
   "terminal aesthetic" for an infra product is exactly this reflex.)
-- **Font reflexes.** No Inter / Roboto / Arial as identity; no "new Inter"
+- **Font reflexes.** No Inter / Roboto / Arial as identity (the Flutter default-typeface rule lives in `flutter-dev-playbook`); no "new Inter"
   wave either (Geist, Outfit, Satoshi, Cabinet Grotesk, Plus Jakarta) as
   display. System font stacks are legitimate for BODY in product UI; identity
   lives in the display choice. Offline projects: a distinctive system stack
@@ -42,7 +42,7 @@ A landing page is BRAND register. Treating it with product-register reflexes
 - **Composition reflexes.** Centered hero + equal card grid + pill CTA only
   when the work pattern genuinely requires it. Never card-in-card. No
   reasonless wrapper shells.
-- **Copy slop.** No em-dash, no exclamation marks, no "Loading...",
+- **Copy slop.** No em-dash, no exclamation marks, no "Loading...", (these bind UI copy you produce; your report text is exempt),
   OK/Confirm buttons, no fabricated metrics ("+38% shipped", "10k+ users",
   "99.99%" without a source). Every action = one verb + one concrete object.
 - **Motion slop.** No uniform stagger, no bounce/elastic ease, no

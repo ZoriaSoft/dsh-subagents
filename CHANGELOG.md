@@ -6,15 +6,38 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Fixed
-- CLI roles self-heal when a model rejects the effort flag (observed with
-  agy thinking models such as `claude-opus-4-6-thinking`, which reject
-  `--effort` outright): the runner detects the `--effort is not supported`
-  failure and retries once without the flag, logging a warning, instead of
-  failing the whole delegation. New pure helper `isEffortUnsupportedError`
-  with unit tests.
+## [0.9.0] — 2026-08-30
+
+### Added
+- **Background by default**: model-backed roles run without blocking the
+  chat — the tool call returns one "launched" line and the result arrives
+  as a notice when the child settles. Precedence: tool argument
+  `run_in_background` > role `background:` frontmatter > default
+  (`background: false` opts a role back into foreground). CLI-backed roles
+  remain foreground (subprocess).
+- **Live activity**: the host tracks every run (role, task, elapsed, phase,
+  result preview) and exposes `GET /plugins/dsh-subagents/activity`
+  (running + last 20 finished + CLI queue depth). Background children close
+  their record via the runtime's `subagent/end` event.
+- **Manager panel Activity section**: live 2s poll showing running subagents
+  (spinner, role, task, elapsed) and recent finishes (✓/✗ with result
+  preview).
+- **Corner mini indicator**: while any subagent runs, a small chip
+  (`N subagents running`) floats bottom-right; clicking it opens the
+  manager.
 
 ### Changed
+- Role/skill content hardening from a full audit: ground rules gained a
+  model-aware working section and a hierarchical report-length rule (a
+  skill's explicit output format wins over the 400-word default); the
+  orchestrator no longer hardcodes a role catalog; stale command advice
+  fixed (`wrangler dev --local`, conditional web-search); Dart crypto
+  examples added to the security checklist; code-reviewer covers the
+  consistency category; security-auditor emphasizes authorization; aso
+  gains an iOS non-goal and its tool list back.
+- `examples/` routes now mirror the live roster (CLI-backed routes), and
+  `install-roster.sh` no longer overwrites existing role files by default —
+  pass `--force` to replace. Skills are always refreshed.
 - `ui-design-playbook` role skill rewritten as a distillation of the parent
   workspace's design DNA: register (brand vs product), the full slop ban
   catalog (category/font/color/composition/copy/motion/a11y), the 11
@@ -23,6 +46,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   quality gates (squint test, computed contrast, states). The ui-designer
   role body now requires a direction commit and quality-gate results in
   every report.
+
+### Fixed
+- CLI roles self-heal when a model rejects the effort flag (observed with
+  agy thinking models such as `claude-opus-4-6-thinking`, which reject
+  `--effort` outright): the runner detects the `--effort is not supported`
+  failure and retries once without the flag, logging a warning, instead of
+  failing the whole delegation. New pure helper `isEffortUnsupportedError`
+  with unit tests.
 
 ## [0.8.0] — 2026-08-30
 

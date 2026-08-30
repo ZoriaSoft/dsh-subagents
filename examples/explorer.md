@@ -1,8 +1,10 @@
 ---
 name: explorer
 description: Maps an unfamiliar codebase or directory — structure, entry points, module boundaries, key files and where things live. Read-only. Use before planning changes in code the primary agent has not seen, or to answer "what is where" and "how is X organized" questions cheaply.
-model: bai/glm-5.3-flash
-tools: [bash, read, grep, glob, skill]
+cli: agy
+cliModel: gemini-3.7-flash-medium
+cliEffort: medium
+tools: [bash, read, grep, glob, skill] # model routes only (CLI roles: restrict via the CLI itself)
 skills: [subagent-ground-rules, codebase-exploration]
 color: "#2b6a3f"
 ---

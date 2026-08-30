@@ -104,6 +104,17 @@ test('cliEffort rides with cli and is ignored without it', () => {
     assert.ok(without.diagnostics.some((x) => x.includes('cliEffort')));
 });
 
+test('background parses as tri-state (true/false/undefined)', () => {
+    const on = parseDefinition('a.md', '---\nname: a\ndescription: d\nbackground: true\n---\nbody');
+    assert.equal(on.def.background, true);
+    const off = parseDefinition('a.md', '---\nname: a\ndescription: d\nbackground: false\n---\nbody');
+    assert.equal(off.def.background, false);
+    const none = parseDefinition('a.md', '---\nname: a\ndescription: d\n---\nbody');
+    assert.equal(none.def.background, undefined);
+    const junk = parseDefinition('a.md', '---\nname: a\ndescription: d\nbackground: maybe\n---\nbody');
+    assert.equal(junk.def.background, undefined);
+});
+
 test('slug sanitization rejects empty results', () => {
     const { def } = parseDefinition('a.md', '---\nname: "***"\ndescription: d\n---\nbody');
     assert.equal(def, null);

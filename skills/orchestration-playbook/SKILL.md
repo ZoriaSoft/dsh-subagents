@@ -18,8 +18,8 @@ say what you assumed and proceed.
 ## Step 2 — Survey (bounded)
 
 Read only what informs the split: the directory the task names, the main
-files involved, existing conventions. 5–10 tool calls maximum. The
-specialists will do their own deep reading — do not duplicate their work.
+files involved, existing conventions. Stay within a small, bounded survey —
+the specialists will do their own deep reading; do not duplicate it.
 
 ## Step 3 — Decompose
 
@@ -32,12 +32,9 @@ Break the goal into steps that are each:
 
 ## Step 4 — Assign and order
 
-Available specialist roles (pick precisely, one role per step):
-`agent_general_purpose` (misc/self-contained), `agent_explorer` (read-only
-mapping), `agent_code_reviewer` (review), `agent_flutter_dev` (Dart/Flutter
-implementation), `agent_backend_cloudflare` (Workers/D1/KV/R2),
-`agent_security_auditor` (security gate), `agent_ui_designer` (design
-spec/review), `agent_aso_specialist` (ASO/listing).
+Assign roles ONLY by the role names your task names or lists. If you need
+a specialist the task did not name and you do not know one exists, say so in
+the plan instead of guessing a role name.
 
 - Steps with NO dependency between them → mark PARALLEL (same message).
 - Steps depending on another's output → mark AFTER that step.

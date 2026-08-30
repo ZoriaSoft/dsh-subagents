@@ -13,11 +13,14 @@ or stated data. No invented numbers.
 
 From the task: app name, category, target locales (default: en-US + tr-TR),
 and the goal (keyword research / listing copy / competitor scan / review).
+Work in the locales the task names.
 
 ## Step 2 — Keyword research
 
-1. `web_search` the app's category + core function; collect how real users
-   phrase the need and which competitor names dominate.
+1. If a web-search tool exists in your toolset, search the app's category +
+   core function; collect how real users phrase the need and which
+   competitor names dominate. If not, work from the material the task
+   provides and mark every keyword claim `UNVERIFIED`.
 2. Build a keyword table. For each keyword: intent (core/feature/competitor/
    long-tail), why it fits, evidence source. Mark volume/difficulty `EST`
    unless a source states them — never invent numbers.
