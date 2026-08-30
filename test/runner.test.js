@@ -1,21 +1,39 @@
 /** dsh-subagents — runner unit tests (argv map, sanitization, output shaping). */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CLI_RUNNERS, messageText, parseRoute, personaText, sanitizeToolFilter } from '../lib/runner.js';
+import { buildCliArgv, messageText, parseRoute, personaText, sanitizeToolFilter, Semaphore } from '../lib/runner.js';
 
-test('cli argv map uses verified headless flags', () => {
-    assert.deepEqual(CLI_RUNNERS.cmdc('p'), ['cmdc', '--no-session', '-p', 'p']);
-    assert.deepEqual(CLI_RUNNERS.pi('p'), ['pi', '--no-session', '-p', 'p']);
-    assert.deepEqual(CLI_RUNNERS.agy('p'), ['agy', '--disable-slash-commands', '-p', 'p']);
-    assert.deepEqual(CLI_RUNNERS.claude('p'), ['claude', '-p', 'p']);
+test('cli argv uses verified headless flags', () => {
+    assert.deepEqual(buildCliArgv('cmdc', 'p'), ['cmdc', '--no-session', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('pi', 'p'), ['pi', '--no-session', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('agy', 'p'), ['agy', '--disable-slash-commands', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('claude', 'p'), ['claude', '-p', 'p']);
     // dsh headless takes the task positionally — no -p
-    assert.deepEqual(CLI_RUNNERS.dsh('p'), ['dsh', '--profile', 'headless', 'p']);
+    assert.deepEqual(buildCliArgv('dsh', 'p'), ['dsh', '--profile', 'headless', 'p']);
+});
+
+test('system prompt becomes --append-system-prompt where supported', () => {
+    assert.deepEqual(buildCliArgv('pi', 'p', 'ROLE'), ['pi', '--no-session', '--append-system-prompt', 'ROLE', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('claude', 'p', 'ROLE'), ['claude', '--append-system-prompt', 'ROLE', '-p', 'p']);
+});
+
+test('unsupported CLIs get the role embedded into the task', () => {
+    assert.deepEqual(buildCliArgv('cmdc', 'p', 'ROLE'), ['cmdc', '--no-session', '-p', '[Role instructions]\nROLE\n\n[Task]\np']);
+    assert.deepEqual(buildCliArgv('agy', 'p', 'ROLE'), ['agy', '--disable-slash-commands', '-p', '[Role instructions]\nROLE\n\n[Task]\np']);
+});
+
+test('dsh headless ignores an undeliverable system prompt', () => {
+    assert.deepEqual(buildCliArgv('dsh', 'p', 'ROLE'), ['dsh', '--profile', 'headless', 'p']);
+});
+
+test('unknown cli fails loudly', () => {
+    assert.throws(() => buildCliArgv('nope', 'p'), /unknown cli/);
 });
 
 test('prompt is a single argv element (no shell, no injection surface)', () => {
     const evil = 'x"; rm -rf /; echo "';
-    for (const build of Object.values(CLI_RUNNERS)) {
-        const argv = build(evil);
+    for (const cli of ['cmdc', 'pi', 'agy', 'claude', 'dsh']) {
+        const argv = buildCliArgv(cli, evil, undefined);
         assert.equal(argv.filter((a) => a === evil).length, 1);
     }
 });
@@ -56,4 +74,20 @@ test('empty allow-list after sanitization fails loudly', () => {
 test('no filter fields → undefined', () => {
     const ctx = { tools: { view: () => ({ knownNames: [] }) }, logger: { warn: () => { } } };
     assert.equal(sanitizeToolFilter(ctx, { name: 'r' }), undefined);
+});
+
+test('semaphore caps concurrency and releases in order', async () => {
+    const sem = new Semaphore(2);
+    const order = [];
+    const r1 = await sem.acquire();
+    const r2 = await sem.acquire();
+    let r3ticket = undefined;
+    const p3 = sem.acquire().then((r) => { order.push('3'); return r; });
+    await new Promise((r) => setTimeout(r, 10));
+    r1(); // admit 3
+    await p3.then((r) => (r3ticket = r));
+    r2();
+    r3ticket?.();
+    assert.deepEqual(order, ['3']);
+    assert.equal(sem.active, 0);
 });

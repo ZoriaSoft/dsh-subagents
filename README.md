@@ -1,6 +1,10 @@
 # dsh-subagents
 
+![CI](https://github.com/Zoriasoft/dsh-subagents/actions/workflows/ci.yml/badge.svg)
+
 ZCode-style custom subagents for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh).
+
+![A CLI-backed subagent tool call returning its result in a dsh session](docs/screenshot.png)
 
 Define reusable roles — a reviewer, a test writer, a docs researcher — as Markdown files.
 Each definition becomes a per-role agent tool (`agent_reviewer`, `agent_test_writer`, …)
@@ -60,20 +64,19 @@ Translate or rewrite the given text as instructed by the task prompt.
 ```
 
 The role runs `cmdc --no-session -p "<task>"` in a shell-less subprocess and the tool
-call returns its output — like a bash call with a brain you chose. Supported CLIs and
-their headless invocations:
+call returns its output — like a bash call with a brain you chose. The definition body
+is delivered as the role's system prompt where the CLI supports one:
 
-| `cli:`   | invocation                          |
-|----------|-------------------------------------|
-| `cmdc`   | `cmdc --no-session -p <task>`       |
-| `pi`     | `pi --no-session -p <task>`         |
-| `agy`    | `agy --disable-slash-commands -p <task>` |
-| `claude` | `claude -p <task>`                  |
-| `dsh`    | `dsh --profile headless <task>`     |
+| `cli:`   | headless invocation                       | definition body delivered as |
+|----------|-------------------------------------------|------------------------------|
+| `cmdc`   | `cmdc --no-session -p <task>`             | embedded role instructions   |
+| `pi`     | `pi --no-session -p <task>`               | `--append-system-prompt`     |
+| `agy`    | `agy --disable-slash-commands -p <task>`  | embedded role instructions   |
+| `claude` | `claude -p <task>`                        | `--append-system-prompt`     |
+| `dsh`    | `dsh --profile headless <task>`           | not deliverable (documented) |
 
-CLI roles are always foreground. Each CLI must be on `PATH`; the definition body is not
-forwarded to CLIs that take no system-prompt flag — put role guidance into the task
-prompt instead.
+CLI roles are always foreground and share a configurable concurrency cap
+(`maxConcurrentCli`, default 3). Each CLI must be on `PATH`.
 
 ## Definition file reference
 
@@ -110,16 +113,20 @@ to the profile's packages (`dsh-tools`, `cordis`, `dsh-llm`); see
 
 ## Configuration (`cordis.patch.yml`)
 
-| Key              | Default            | Description                              |
-|------------------|--------------------|------------------------------------------|
-| `agentsDir`      | `$DSH_HOME/agents` | Where definition files live.             |
-| `provider`       | `spawn`            | Continuable subagent provider.           |
-| `cliTimeoutMs`   | `300000`           | CLI subprocess timeout.                  |
-| `modelTimeoutMs` | `600000`           | Headroom for model-backed tool calls.    |
-| `maxOutputChars` | `12000`            | Output cap returned to the calling agent.|
-| `rescanMs`       | `15000`            | Rescan interval (hot-reload safety net). |
+| Key                | Default            | Description                              |
+|--------------------|--------------------|------------------------------------------|
+| `agentsDir`        | `$DSH_HOME/agents` | Where definition files live.             |
+| `provider`         | `spawn`            | Continuable subagent provider.           |
+| `cliTimeoutMs`     | `300000`           | CLI subprocess timeout.                  |
+| `modelTimeoutMs`   | `600000`           | Headroom for model-backed tool calls.    |
+| `maxOutputChars`   | `12000`            | Output cap returned to the calling agent.|
+| `maxConcurrentCli` | `3`                | Concurrent CLI-backed executions cap.    |
+| `rescanMs`         | `15000`            | Rescan interval (hot-reload safety net). |
 
 ## Operations
+
+In a dsh session, the `/agents` slash command lists configured roles and any
+definition diagnostics.
 
 ```sh
 node --test                     # unit tests
@@ -131,6 +138,24 @@ The debug route lists loaded roles, registered `agent_*` tools and per-file diag
 (missing keys, bad routes, duplicates). Host-half changes need a `dsh-web` restart;
 definition-file changes do not.
 
+## Architecture decisions
+
+- **No system-prompt sections.** Discovery happens through per-role tool
+  descriptions. Your chat carries zero extra protocol; only the roles you
+  define exist as tools.
+- **Registration anchoring.** In the verified dsh composition, a tool
+  registration made inside the plugin's apply fiber is rolled back when that
+  fiber ends, while native timers, file-watch callbacks and HTTP handlers
+  anchor registrations durably. The rescan interval therefore doubles as a
+  self-heal loop: `lib/reconcile.js` re-makes any registration the registry no
+  longer shows. If a future dsh release changes this fiber behavior, the
+  interval simply becomes a no-op.
+- **Pure core.** Frontmatter parsing, argv building and reconciliation are
+  dependency-free pure modules with unit tests; only `lib/index.js` touches
+  cordis/dsh services.
+- **Frontmatter is a practical YAML subset** (scalars, quoted values, inline
+  and block lists, `|`/`>` block scalars). No nested structures by design.
+
 ## Differences from ZCode
 
 - **CLI-backed roles** — a role can be an external CLI, not just a dsh model.
@@ -141,6 +166,10 @@ definition-file changes do not.
   counterpart yet and are ignored.
 - Subagents inherit the session's tool registry (including connected MCP tools);
   allow/deny lists are enforced host-side per spawn.
+- **User-level only.** Workspace/project-level agent directories are deliberately
+  out of scope for now: dsh tools register globally, so a workspace-scoped role
+  would either leak into other workspaces or need per-agent registration the
+  current runtime does not expose. A future runtime API may unlock this safely.
 
 ## Development
 
@@ -152,6 +181,10 @@ node --check lib/*.js
 Layout: `lib/definitions.js` (frontmatter + validation), `lib/runner.js` (model/CLI
 execution), `lib/index.js` (tool registration, hot reload, debug route). Verified
 against dsh `0.1.1-rc.2`; re-run the smoke after upgrading dsh.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

@@ -7,9 +7,10 @@
         # agentsDir: /absolute/path/to/agents
         # Continuable subagent provider (dsh-subagent-spawn-in-process).
         provider: spawn
-        # CLI-backed roles: subprocess timeout and output cap.
+        # CLI-backed roles: subprocess timeout, output cap and concurrency.
         cliTimeoutMs: 300000
         maxOutputChars: 12000
+        maxConcurrentCli: 3
         # Model-backed roles: tool-call timeout headroom.
         modelTimeoutMs: 600000
         # Self-heal rescan interval (also hot-reload safety net).

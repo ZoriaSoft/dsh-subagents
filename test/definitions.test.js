@@ -43,6 +43,26 @@ test('no frontmatter block returns null', () => {
     assert.equal(parseFrontmatter('---\nunclosed: true\n'), null);
 });
 
+test('literal block scalar (|) keeps line breaks', () => {
+    const text = ['---', 'name: a', 'description: |', '  line one', '  line two', 'model: bai/x', '---', 'body'].join('\n');
+    const { attrs } = parseFrontmatter(text);
+    assert.equal(attrs.description, 'line one\nline two');
+    assert.equal(attrs.model, 'bai/x');
+});
+
+test('folded block scalar (>) joins with spaces', () => {
+    const text = ['---', 'name: a', 'description: >', '  line one', '  line two', '---', 'body'].join('\n');
+    const { attrs } = parseFrontmatter(text);
+    assert.equal(attrs.description, 'line one line two');
+});
+
+test('block scalar with chomping indicator and trailing blanks', () => {
+    const text = ['---', 'name: a', 'description: |-', '  only line', '', 'model: bai/x', '---', 'body'].join('\n');
+    const { attrs } = parseFrontmatter(text);
+    assert.equal(attrs.description, 'only line');
+    assert.equal(attrs.model, 'bai/x');
+});
+
 test('unknown keys are ignored but reported', () => {
     const { def, diagnostics } = parseDefinition('a.md', '---\nname: a\ndescription: d\nthoughtLevel: high\n---\nbody');
     assert.equal(def.name, 'a');
