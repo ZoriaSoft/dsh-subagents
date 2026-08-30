@@ -1,6 +1,6 @@
 # dsh-subagents
 
-![CI](https://github.com/Zoriasoft/dsh-subagents/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/ZoriaSoft/dsh-subagents/actions/workflows/ci.yml/badge.svg)
 
 ZCode-style custom subagents for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh).
 
