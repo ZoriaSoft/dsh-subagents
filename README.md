@@ -4,8 +4,6 @@
 
 ZCode-style custom subagents for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh).
 
-![A CLI-backed subagent tool call returning its result in a dsh session](docs/screenshot.png)
-
 Define reusable roles — a reviewer, a test writer, a docs researcher — as Markdown files.
 Each definition becomes a per-role agent tool (`agent_reviewer`, `agent_test_writer`, …)
 your primary model delegates to from any normal session. Roles run on their **own model
@@ -167,8 +165,6 @@ to the profile's packages (`dsh-tools`, `cordis`, `dsh-llm`); see
 | `rescanMs`         | `15000`            | Rescan interval (hot-reload safety net). |
 
 ## Operations
-
-![The Subagents manager](docs/panel.png)
 
 A sidebar launcher opens the **Subagents manager**: a roles list plus a
 ZCode-style New/Edit editor. Pick the role's brain from the live model
