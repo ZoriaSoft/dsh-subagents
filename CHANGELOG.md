@@ -6,6 +6,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+- `background:` pins on model-backed roles survive the manager round-trip:
+  `serializeDefinition` emitted the key only inside the CLI branch, so
+  editing a model role from the panel silently dropped the pin. `/save` now
+  accepts an explicit boolean (rejecting `background` on CLI-backed roles,
+  which are always foreground), preserves the file's existing pin when the
+  payload omits the field, and `/debug` reports the field for enabled and
+  disabled roles. Round-trip coverage added to the serializer tests.
+- The `run_in_background` tool description no longer claims foreground is
+  the default for model-backed roles — it now states the background default
+  (and that passing `false` waits), so the primary agent picks the argument
+  correctly.
+
 ## [0.9.0] — 2026-08-30
 
 ### Added

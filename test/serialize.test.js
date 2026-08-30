@@ -8,6 +8,7 @@ const DEFS = [
         name: 'reviewer',
         description: 'Reviews code for bugs.',
         model: 'bai/glm-5.3-flash',
+        background: false,
         color: '#d9480f',
         tools: ['bash', 'read'],
         body: 'You are a reviewer.',
@@ -29,6 +30,7 @@ const DEFS = [
         name: 'security-auditor',
         description: 'Audits code.',
         model: 'bai/glm-5.3-flash',
+        background: true,
         disallowedTools: ['write', 'edit'],
         skills: ['subagent-ground-rules', 'security-review-checklist'],
         body: 'You are an auditor.',
@@ -51,6 +53,7 @@ test('serialize → parse round-trips every field', () => {
         assert.equal(back.cli, def.cli);
         assert.equal(back.cliModel, def.cliModel);
         assert.equal(back.cliEffort, def.cliEffort);
+        assert.equal(back.background, def.background);
         assert.deepEqual(back.tools, def.tools);
         assert.deepEqual(back.disallowedTools, def.disallowedTools);
         assert.deepEqual(back.skills, def.skills);
@@ -82,4 +85,9 @@ test('cliModel and cliEffort serialize next to cli', () => {
     assert.match(text, /^cli: cmdc$/m);
     assert.match(text, /^cliModel: glm-5.3$/m);
     assert.match(text, /^cliEffort: high$/m);
+});
+
+test('background serializes for model-backed roles too', () => {
+    assert.match(serializeDefinition(DEFS[0]), /^background: false$/m);
+    assert.match(serializeDefinition(DEFS[3]), /^background: true$/m);
 });
