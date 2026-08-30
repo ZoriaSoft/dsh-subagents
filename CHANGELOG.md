@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] — 2026-08-30
+
+### Added
+- Role skills: definitions may name skills (`skills: [name, …]`), resolved at
+  spawn time and inlined into the child persona — deterministic preload for
+  cheap models, zero pollution of the calling session's skill catalog.
+  Resolution: `skillsDirs` config (default `$DSH_HOME/subagent-skills`) wins
+  over the plugin-bundled `skills/`; bundled `subagent-ground-rules` ships as
+  an example. Missing skills warn and spawn without.
+
+### Changed
+- Hot-reload reconciliation now compares content signatures instead of object
+  identity (`definitionSignature`): unchanged definitions are never pointlessly
+  re-registered on rescans.
+
 ## [0.4.0] — 2026-08-30
 
 ### Added

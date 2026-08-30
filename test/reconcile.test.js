@@ -17,8 +17,17 @@ test('removed definitions get unregistered', () => {
     assert.deepEqual(out.register, []);
 });
 
-test('edited definition (new object identity) is re-registered', () => {
+test('same content under a new object identity is left alone (signature compare)', () => {
+    // loadDefinitions() mints fresh objects on every scan; equal content must
+    // not churn registrations. Only a content change re-registers.
     const out = reconcile(new Map([['a', def('a')]]), new Map([['a', def('a')]]), () => true);
+    assert.deepEqual(out.unregister, []);
+    assert.deepEqual(out.register, []);
+});
+
+test('changed content is re-registered', () => {
+    const edited = { ...def('a'), description: 'new description' };
+    const out = reconcile(new Map([['a', def('a')]]), new Map([['a', edited]]), () => true);
     assert.deepEqual(out.unregister.map((d) => d.slug), ['a']);
     assert.deepEqual(out.register.map((d) => d.slug), ['a']);
 });
@@ -43,7 +52,7 @@ test('unchanged but rolled-back registration is re-made', () => {
 test('mixed set handles all four cases at once', () => {
     const keep = def('keep');
     const editOld = def('edit');
-    const editNew = def('edit');
+    const editNew = { ...def('edit'), body: 'changed' };
     const out = reconcile(new Map([['keep', keep], ['edit', editOld], ['gone', def('gone')]]), new Map([['keep', keep], ['edit', editNew], ['added', def('added')]]), (name) => name === 'agent_keep');
     assert.deepEqual(out.unregister.map((d) => d.slug).sort(), ['edit', 'gone']);
     assert.deepEqual(out.register.map((d) => d.slug).sort(), ['added', 'edit']);

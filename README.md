@@ -78,6 +78,29 @@ is delivered as the role's system prompt where the CLI supports one:
 CLI roles are always foreground and share a configurable concurrency cap
 (`maxConcurrentCli`, default 3). Each CLI must be on `PATH`.
 
+## Role skills
+
+Cheap models cannot be trusted to load a skill before acting. A definition can
+therefore name skills, and dsh-subagents resolves them **at spawn time** and
+inlines them into the child's persona — deterministic preload, and the calling
+session's skill catalog stays untouched:
+
+```markdown
+---
+name: reviewer
+description: Reviews code or a diff for bugs, risks and missing tests.
+model: bai/glm-5.3-flash
+skills: [subagent-ground-rules]
+---
+You are a code review subagent…
+```
+
+Skill files are plain Markdown (`<name>.md` or `<name>/SKILL.md`; frontmatter
+is parsed and stripped). Resolution order: `skillsDirs` entries first (default
+`$DSH_HOME/subagent-skills/`), then the plugin-bundled `skills/` — a user copy
+overrides a bundled skill. Editing a skill file applies to the very next spawn;
+a missing skill logs a warning and the role spawns without it.
+
 ## Definition file reference
 
 Markdown with frontmatter; the body is the role's system prompt. Keys are camelCase and
@@ -92,6 +115,7 @@ starts with `_` is disabled.
 | `cli`              | Run through an external CLI instead of a dsh model. Mutually exclusive with `model`. |
 | `tools`            | Exhaustive allow-list of tool names (omit for all). Unknown names are dropped with a warning; an allow-list matching nothing fails the call loudly. |
 | `disallowedTools`  | Deny-list of tool names.                                                    |
+| `skills`           | Role skill names (see [Role skills](#role-skills)) — resolved and inlined into the persona at spawn time. |
 | `color`            | Identity marker (informational).                                            |
 
 ZCode keys with no dsh-runtime counterpart (`thoughtLevel`, `maxTurns`, `injectAgentsMd`,
