@@ -65,13 +65,16 @@ The role runs `cmdc --no-session -p "<task>"` in a shell-less subprocess and the
 call returns its output — like a bash call with a brain you chose. The definition body
 is delivered as the role's system prompt where the CLI supports one:
 
-| `cli:`   | headless invocation                       | definition body delivered as |
-|----------|-------------------------------------------|------------------------------|
-| `cmdc`   | `cmdc --no-session -p <task>`             | embedded role instructions   |
-| `pi`     | `pi --no-session -p <task>`               | `--append-system-prompt`     |
-| `agy`    | `agy --disable-slash-commands -p <task>`  | embedded role instructions   |
-| `claude` | `claude -p <task>`                        | `--append-system-prompt`     |
-| `dsh`    | `dsh --profile headless <task>`           | not deliverable (documented) |
+A CLI role can also pin the CLI's own model (`cliModel:`) — passed through the
+CLI's `--model` flag (`dsh` headless is profile-bound and does not support it):
+
+| `cli:`   | headless invocation                                        | model flag    | definition body delivered as |
+|----------|------------------------------------------------------------|---------------|------------------------------|
+| `cmdc`   | `cmdc --no-session -p <task>`                              | `--model`     | embedded role instructions   |
+| `pi`     | `pi --no-session -p <task>`                                | `--model`     | `--append-system-prompt`     |
+| `agy`    | `agy --disable-slash-commands -p <task>`                   | `--model`     | embedded role instructions   |
+| `claude` | `claude -p <task>`                                         | `--model`     | `--append-system-prompt`     |
+| `dsh`    | `dsh --profile headless <task>`                            | —             | not deliverable (documented) |
 
 CLI roles are always foreground and share a configurable concurrency cap
 (`maxConcurrentCli`, default 3). Each CLI must be on `PATH`.
@@ -137,6 +140,7 @@ starts with `_` is disabled.
 | `description`      | Required. When the primary agent should pick this role — be specific.       |
 | `model`            | `provider/model`, or `inherit` / omitted to follow the calling session.     |
 | `cli`              | Run through an external CLI instead of a dsh model. Mutually exclusive with `model`. |
+| `cliModel`         | The CLI's own model id, passed via its `--model` flag. Requires `cli`. |
 | `tools`            | Exhaustive allow-list of tool names (omit for all). Unknown names are dropped with a warning; an allow-list matching nothing fails the call loudly. |
 | `disallowedTools`  | Deny-list of tool names.                                                    |
 | `skills`           | Role skill names (see [Role skills](#role-skills)) — resolved and inlined into the persona at spawn time. |

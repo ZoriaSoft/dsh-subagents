@@ -88,6 +88,14 @@ test('model inherit and malformed routes fall back to session model', () => {
     assert.ok(bad.diagnostics.some((d) => d.includes('not provider/model')));
 });
 
+test('cliModel rides with cli and is ignored without it', () => {
+    const withCli = parseDefinition('a.md', '---\nname: a\ndescription: d\ncli: agy\ncliModel: gemini-2.5-flash\n---\nbody');
+    assert.equal(withCli.def.cliModel, 'gemini-2.5-flash');
+    const without = parseDefinition('a.md', '---\nname: a\ndescription: d\ncliModel: x\n---\nbody');
+    assert.equal(without.def.cliModel, undefined);
+    assert.ok(without.diagnostics.some((x) => x.includes('cliModel')));
+});
+
 test('slug sanitization rejects empty results', () => {
     const { def } = parseDefinition('a.md', '---\nname: "***"\ndescription: d\n---\nbody');
     assert.equal(def, null);

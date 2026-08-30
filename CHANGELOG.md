@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] — 2026-08-30
+
+### Added
+- Model selection for CLI-backed roles: `cliModel` pins the CLI's own model
+  and is delivered through its `--model` flag (cmdc, pi, agy, claude; the dsh
+  headless profile is model-bound and documented as unsupported). The manager
+  editor shows a model input under the CLI picker, `/save` validates the
+  combination and `/debug` round-trips it.
+
 ## [0.6.0] — 2026-08-30
 
 ### Changed (breaking — roster redesign)

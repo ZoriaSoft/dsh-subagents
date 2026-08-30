@@ -26,6 +26,25 @@ test('dsh headless ignores an undeliverable system prompt', () => {
     assert.deepEqual(buildCliArgv('dsh', 'p', 'ROLE'), ['dsh', '--profile', 'headless', 'p']);
 });
 
+test('cliModel is passed through the CLI model flag', () => {
+    assert.deepEqual(buildCliArgv('agy', 'p', undefined, 'gemini-2.5-flash'),
+        ['agy', '--disable-slash-commands', '--model', 'gemini-2.5-flash', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('cmdc', 'p', undefined, 'minimax/minimax-m3-free'),
+        ['cmdc', '--no-session', '--model', 'minimax/minimax-m3-free', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('pi', 'p', undefined, 'glm-5.3'),
+        ['pi', '--no-session', '--model', 'glm-5.3', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('claude', 'p', undefined, 'sonnet'),
+        ['claude', '--model', 'sonnet', '-p', 'p']);
+});
+
+test('dsh headless ignores a cliModel it cannot deliver', () => {
+    assert.deepEqual(buildCliArgv('dsh', 'p', undefined, 'x'), ['dsh', '--profile', 'headless', 'p']);
+});
+
+test('empty cliModel adds no flag', () => {
+    assert.deepEqual(buildCliArgv('agy', 'p', undefined, ''), ['agy', '--disable-slash-commands', '-p', 'p']);
+});
+
 test('unknown cli fails loudly', () => {
     assert.throws(() => buildCliArgv('nope', 'p'), /unknown cli/);
 });
