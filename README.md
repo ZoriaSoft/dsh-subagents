@@ -85,6 +85,14 @@ pick a model from the list, pick an effort, see them on the role badge.
 CLI roles are always foreground and share a configurable concurrency cap
 (`maxConcurrentCli`, default 3). Each CLI must be on `PATH`.
 
+> **Thinking models and `--effort`:** some CLI models reject the effort flag
+> outright — notably agy's thinking variants (`claude-opus-4-6-thinking`,
+> `claude-sonnet-4-6`) answer `--effort is not supported for model "<id>"` and
+> exit non-zero. The runner self-heals this: it detects that rejection and
+> retries the invocation once without the flag, logging a warning. You can
+> pin such a model (`cliModel`); just leave `cliEffort` empty for it — the
+> warning is a safety net for manager-UI picks that pair them anyway.
+
 ## Role skills
 
 Cheap models cannot be trusted to load a skill before acting. A definition can

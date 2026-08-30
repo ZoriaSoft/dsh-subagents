@@ -4,6 +4,26 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- CLI roles self-heal when a model rejects the effort flag (observed with
+  agy thinking models such as `claude-opus-4-6-thinking`, which reject
+  `--effort` outright): the runner detects the `--effort is not supported`
+  failure and retries once without the flag, logging a warning, instead of
+  failing the whole delegation. New pure helper `isEffortUnsupportedError`
+  with unit tests.
+
+### Changed
+- `ui-design-playbook` role skill rewritten as a distillation of the parent
+  workspace's design DNA: register (brand vs product), the full slop ban
+  catalog (category/font/color/composition/copy/motion/a11y), the 11
+  aesthetic currents table with an explicit direction commit, work-pattern
+  composition, web platform discipline for static sites, and mandatory
+  quality gates (squint test, computed contrast, states). The ui-designer
+  role body now requires a direction commit and quality-gate results in
+  every report.
+
 ## [0.8.0] — 2026-08-30
 
 ### Added

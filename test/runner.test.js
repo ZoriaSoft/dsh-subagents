@@ -1,7 +1,7 @@
 /** dsh-subagents — runner unit tests (argv map, sanitization, output shaping). */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCliArgv, messageText, parseRoute, personaText, sanitizeToolFilter, Semaphore } from '../lib/runner.js';
+import { buildCliArgv, isEffortUnsupportedError, messageText, parseRoute, personaText, sanitizeToolFilter, Semaphore } from '../lib/runner.js';
 
 test('cli argv uses verified headless flags', () => {
     assert.deepEqual(buildCliArgv('cmdc', 'p'), ['cmdc', '--no-session', '-p', 'p']);
@@ -64,6 +64,16 @@ test('dsh headless ignores a cliEffort it cannot deliver', () => {
 test('empty cliEffort adds no flag', () => {
     assert.deepEqual(buildCliArgv('agy', 'p', undefined, 'gemini-2.5-flash', ''),
         ['agy', '--disable-slash-commands', '--model', 'gemini-2.5-flash', '-p', 'p']);
+});
+
+test('isEffortUnsupportedError matches the thinking-model rejection, nothing else', () => {
+    // Real agy shape: exit-1 with the rejection on stderr.
+    const agyRejection = { code: 1, stderr: 'Error: invalid model selection (--model "claude-opus-4-6-thinking" --effort "medium"): --effort is not supported for model "claude-opus-4-6-thinking"' };
+    assert.equal(isEffortUnsupportedError(agyRejection), true);
+    assert.equal(isEffortUnsupportedError(new Error('--effort is not supported for model "x"')), true);
+    assert.equal(isEffortUnsupportedError({ code: 1, stderr: 'Error: model not found' }), false);
+    assert.equal(isEffortUnsupportedError(undefined), false);
+    assert.equal(isEffortUnsupportedError(''), false);
 });
 
 test('unknown cli fails loudly', () => {
