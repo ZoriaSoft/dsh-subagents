@@ -125,8 +125,12 @@ to the profile's packages (`dsh-tools`, `cordis`, `dsh-llm`); see
 
 ## Operations
 
-In a dsh session, the `/agents` slash command lists configured roles and any
-definition diagnostics.
+![The Subagents panel](docs/panel.png)
+
+A sidebar launcher opens the **Subagents panel**: every role with its route
+badge, tool name and definition file, definition diagnostics, one-click test
+prompt copy, and enable/disable toggling (edits apply to the next turn via
+hot reload). In a dsh session, the `/agents` slash command lists the same.
 
 ```sh
 node --test                     # unit tests

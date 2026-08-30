@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-08-30
+
+### Added
+- Web panel: sidebar launcher + full-screen overlay listing every role with
+  its route badge (model / cli / session model), tool name, definition file
+  and tool allow-lists; definition diagnostics at a glance.
+- One-click test prompt copy per role and enable/disable toggling from the
+  panel (`POST /plugins/dsh-subagents/toggle` renames the file with the `_`
+  prefix; hot reload applies it to the next turn).
+- Fetch-on-demand panel data (mount + toggle + Refresh button) — no
+  long-lived timers.
+
+### Fixed
+- `/debug` disabled-role entries now carry `disabled: true` (and description
+  / tool lists), so management surfaces render their state correctly.
+
 ## [0.2.0] — 2026-08-29
 
 ### Added

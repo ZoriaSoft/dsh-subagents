@@ -1,6 +1,6 @@
 {
   "name": "dsh-subagents",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "ZCode-style custom subagents for DeepSeek Harness: roles defined as Markdown files become per-role agent tools the primary model delegates to — on a pinned dsh model route or through an external CLI (cmdc, pi, agy, claude, dsh).",
   "type": "module",
   "main": "lib/index.js",
@@ -9,14 +9,16 @@
     "./definitions": "./lib/definitions.js",
     "./runner": "./lib/runner.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./client": "./lib/client.js"
   },
   "files": [
     "lib",
     "examples",
     "cordis.patch.yml",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "scripts"
   ],
   "scripts": {
     "test": "node --test",
@@ -34,6 +36,13 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-layout"
+      ],
+      "platform": "web"
     }
   },
   "peerDependencies": {
