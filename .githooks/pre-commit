@@ -1,0 +1,29 @@
+#!/bin/sh
+# Zoria secret-guard — pre-commit. Atlamak (--no-verify) anayasa gereği yasaktır.
+# Kural: KIRMIZI ÇİZGİ #1 (Projects/zoria-standards/AGENTS.md)
+
+set -u
+
+FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
+
+# 1) Yasaklı dosya adları
+BLOCKED='(^|/)(key\.properties|local\.properties|TOKEN\.txt|[^/]*\.jks|[^/]*\.keystore|\.env($|\.[^/]*))$'
+echo "$FILES" | grep -E "$BLOCKED" | while IFS= read -r f; do
+  echo "❌ SECRET-GUARD: yasaklı dosya staging'de: $f"
+done
+[ -z "$(echo "$FILES" | grep -E "$BLOCKED")" ] || {
+  echo "❌ Secret-guard engelledi. Dosyayı unstaging yap: git restore --staged <dosya>"
+  exit 1
+}
+
+# 2) Staged içerikte bilinen token kalıpları
+PATTERNS='ghp_[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9]{20,}|AIza[A-Za-z0-9_-]{30,}|xox[bp]-[A-Za-z0-9-]{10,}'
+HITS="$(git diff --cached -U0 --no-color | grep -E '^\+' | grep -oE "$PATTERNS" | sort -u)"
+[ -n "$HITS" ] && {
+  echo "❌ SECRET-GUARD: staged içerikte token/anahtar kalıbı bulundu:"
+  echo "$HITS" | sed 's/^/   /'
+  echo "   Kalıbı koddan çıkar (env/değişken kullan). Detay: AGENTS.md Kırmızı Çizgi #1"
+  exit 1
+}
+
+exit 0
