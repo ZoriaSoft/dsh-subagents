@@ -85,7 +85,7 @@ pick a model from the list, pick an effort, see them on the role badge.
 | `agy`    | `agy --disable-slash-commands -p <task>`                   | `--model`     | `--effort`      | embedded role instructions   |
 | `claude` | `claude -p <task>`                                         | `--model`     | `--effort`      | `--append-system-prompt`     |
 | `dsh`    | `dsh --profile headless <task>`                            | —             | —               | not deliverable (documented) |
-| `vibe`   | `vibe --auto-approve [--agent <model>] -p <task>`          | `--agent`     | —               | embedded role instructions   |
+| `vibe`   | `vibe --auto-approve --output text [--agent <model>] -p <task>` | `--agent` | — | embedded role instructions; text output pinned — default mode blocks on a non-tty stdout pipe |
 
 CLI roles are always foreground and share a configurable concurrency cap
 (`maxConcurrentCli`, default 3). Each CLI must be on `PATH`. A role's `tools:`

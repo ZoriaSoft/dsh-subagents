@@ -10,7 +10,8 @@ test('cli argv uses verified headless flags', () => {
     assert.deepEqual(buildCliArgv('claude', 'p'), ['claude', '-p', 'p']);
     // dsh headless takes the task positionally — no -p
     assert.deepEqual(buildCliArgv('dsh', 'p'), ['dsh', '--profile', 'headless', 'p']);
-    assert.deepEqual(buildCliArgv('vibe', 'p'), ['vibe', '--auto-approve', '-p', 'p']);
+    // vibe's default output mode blocks on a non-tty stdout pipe — text is pinned in the base argv
+    assert.deepEqual(buildCliArgv('vibe', 'p'), ['vibe', '--auto-approve', '--output', 'text', '-p', 'p']);
 });
 
 test('system prompt becomes --append-system-prompt where supported', () => {
@@ -21,7 +22,7 @@ test('system prompt becomes --append-system-prompt where supported', () => {
 test('unsupported CLIs get the role embedded into the task', () => {
     assert.deepEqual(buildCliArgv('cmdc', 'p', 'ROLE'), ['cmdc', '--no-session', '-p', '[Role instructions]\nROLE\n\n[Task]\np']);
     assert.deepEqual(buildCliArgv('agy', 'p', 'ROLE'), ['agy', '--disable-slash-commands', '-p', '[Role instructions]\nROLE\n\n[Task]\np']);
-    assert.deepEqual(buildCliArgv('vibe', 'p', 'ROLE'), ['vibe', '--auto-approve', '-p', '[Role instructions]\nROLE\n\n[Task]\np']);
+    assert.deepEqual(buildCliArgv('vibe', 'p', 'ROLE'), ['vibe', '--auto-approve', '--output', 'text', '-p', '[Role instructions]\nROLE\n\n[Task]\np']);
 });
 
 test('dsh headless ignores an undeliverable system prompt', () => {
@@ -38,7 +39,7 @@ test('cliModel is passed through the CLI model flag', () => {
     assert.deepEqual(buildCliArgv('claude', 'p', undefined, 'sonnet'),
         ['claude', '--model', 'sonnet', '-p', 'p']);
     assert.deepEqual(buildCliArgv('vibe', 'p', undefined, 'glm'),
-        ['vibe', '--auto-approve', '--agent', 'glm', '-p', 'p']);
+        ['vibe', '--auto-approve', '--output', 'text', '--agent', 'glm', '-p', 'p']);
 });
 
 test('dsh headless ignores a cliModel it cannot deliver', () => {
@@ -67,7 +68,7 @@ test('dsh headless ignores a cliEffort it cannot deliver', () => {
 
 test('vibe has no effort flag to deliver', () => {
     assert.deepEqual(buildCliArgv('vibe', 'p', undefined, undefined, 'high'),
-        ['vibe', '--auto-approve', '-p', 'p']);
+        ['vibe', '--auto-approve', '--output', 'text', '-p', 'p']);
 });
 
 test('empty cliEffort adds no flag', () => {
