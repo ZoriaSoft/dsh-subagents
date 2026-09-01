@@ -10,6 +10,7 @@ test('cli argv uses verified headless flags', () => {
     assert.deepEqual(buildCliArgv('claude', 'p'), ['claude', '-p', 'p']);
     // dsh headless takes the task positionally — no -p
     assert.deepEqual(buildCliArgv('dsh', 'p'), ['dsh', '--profile', 'headless', 'p']);
+    assert.deepEqual(buildCliArgv('vibe', 'p'), ['vibe', '--auto-approve', '-p', 'p']);
 });
 
 test('system prompt becomes --append-system-prompt where supported', () => {
@@ -20,6 +21,7 @@ test('system prompt becomes --append-system-prompt where supported', () => {
 test('unsupported CLIs get the role embedded into the task', () => {
     assert.deepEqual(buildCliArgv('cmdc', 'p', 'ROLE'), ['cmdc', '--no-session', '-p', '[Role instructions]\nROLE\n\n[Task]\np']);
     assert.deepEqual(buildCliArgv('agy', 'p', 'ROLE'), ['agy', '--disable-slash-commands', '-p', '[Role instructions]\nROLE\n\n[Task]\np']);
+    assert.deepEqual(buildCliArgv('vibe', 'p', 'ROLE'), ['vibe', '--auto-approve', '-p', '[Role instructions]\nROLE\n\n[Task]\np']);
 });
 
 test('dsh headless ignores an undeliverable system prompt', () => {
@@ -35,6 +37,8 @@ test('cliModel is passed through the CLI model flag', () => {
         ['pi', '--no-session', '--model', 'glm-5.3', '-p', 'p']);
     assert.deepEqual(buildCliArgv('claude', 'p', undefined, 'sonnet'),
         ['claude', '--model', 'sonnet', '-p', 'p']);
+    assert.deepEqual(buildCliArgv('vibe', 'p', undefined, 'glm'),
+        ['vibe', '--auto-approve', '--agent', 'glm', '-p', 'p']);
 });
 
 test('dsh headless ignores a cliModel it cannot deliver', () => {
@@ -59,6 +63,11 @@ test('cliEffort is passed through the CLI effort flag', () => {
 test('dsh headless ignores a cliEffort it cannot deliver', () => {
     assert.deepEqual(buildCliArgv('dsh', 'p', undefined, undefined, 'high'),
         ['dsh', '--profile', 'headless', 'p']);
+});
+
+test('vibe has no effort flag to deliver', () => {
+    assert.deepEqual(buildCliArgv('vibe', 'p', undefined, undefined, 'high'),
+        ['vibe', '--auto-approve', '-p', 'p']);
 });
 
 test('empty cliEffort adds no flag', () => {
@@ -99,7 +108,7 @@ test('unknown cli fails loudly', () => {
 
 test('prompt is a single argv element (no shell, no injection surface)', () => {
     const evil = 'x"; rm -rf /; echo "';
-    for (const cli of ['cmdc', 'pi', 'agy', 'claude', 'dsh']) {
+    for (const cli of ['cmdc', 'pi', 'agy', 'claude', 'dsh', 'vibe']) {
         const argv = buildCliArgv(cli, evil, undefined);
         assert.equal(argv.filter((a) => a === evil).length, 1);
     }

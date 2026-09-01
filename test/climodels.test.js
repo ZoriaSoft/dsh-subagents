@@ -1,7 +1,7 @@
 /** dsh-subagents — CLI model listing parser tests. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCmdcModels, parsePiModels, parseAgyModels, CLI_EFFORTS } from '../lib/climodels.js';
+import { parseCmdcModels, parsePiModels, parseAgyModels, CLI_EFFORTS, modelsFor } from '../lib/climodels.js';
 
 const CMDC = `Available models  ·  99 models
 
@@ -56,4 +56,10 @@ test('effort flags and levels per CLI', () => {
     assert.deepEqual(CLI_EFFORTS.pi.levels, ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max']);
     assert.deepEqual(CLI_EFFORTS.claude.levels, ['low', 'medium', 'high', 'xhigh', 'max']);
     assert.equal(CLI_EFFORTS.dsh.flag, null);
+    assert.equal(CLI_EFFORTS.vibe.flag, null);
+});
+
+test('static catalogs: vibe resolves without spawning a CLI', async () => {
+    assert.deepEqual(await modelsFor('vibe'), [{ id: 'glm', note: 'GLM 5.2 - Mistral hosted (subscription)' }]);
+    assert.deepEqual(await modelsFor('nope'), []);
 });
