@@ -191,6 +191,32 @@ local customizations win. Pass `--force` to replace them.
 to the profile's packages (`dsh-tools`, `cordis`, `dsh-llm`); see
 [dsh runbook](https://github.com/deepseek-ai/deepseek-harness) notes on linked plugins.
 
+## Headless runner (`bin/dsh-roles.mjs`)
+
+Any CLI-backed role can run outside a dsh session — from other harnesses
+(ZCode, claude CLI), cron or a plain shell. Same definitions, role skills,
+argv and output shaping as the in-session tool:
+
+```sh
+node bin/dsh-roles.mjs list [--json]
+node bin/dsh-roles.mjs run code-reviewer "review the diff in lib/runner.js" \
+    --cwd /home/workspace/Projects/dsh-subagents --timeout-ms 600000
+```
+
+| Flag             | Effect                                                 |
+|------------------|--------------------------------------------------------|
+| `--cwd DIR`      | Working directory for the child CLI (default: here).   |
+| `--timeout-ms N` | Per-call timeout (default `600000`).                   |
+| `--max-chars N`  | Output tail limit (default `20000`).                   |
+| `--cli-model M`  | Override the role's `cliModel` — mind the model pins.  |
+| `--cli-effort E` | Override the role's `cliEffort`.                       |
+| `--agents-dir D` | Definitions dir (default `$DSH_HOME/agents`).          |
+| `--skills-dir D` | Extra role-skill dir, repeatable.                      |
+
+Model-backed roles (no `cli:`) are refused — they need a live dsh session.
+`dsh`-CLI roles additionally need the `PIAI_*` provider keys in the
+environment. Exit codes: `0` ok, `1` role/CLI failure, `2` usage error.
+
 ## Configuration (`cordis.patch.yml`)
 
 | Key                | Default            | Description                              |

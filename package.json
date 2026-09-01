@@ -1,9 +1,12 @@
 {
   "name": "dsh-subagents",
   "version": "0.9.0",
-  "description": "ZCode-style custom subagents for DeepSeek Harness: roles defined as Markdown files become per-role agent tools the primary model delegates to — on a pinned dsh model route or through an external CLI (cmdc, pi, agy, claude, dsh).",
+  "description": "ZCode-style custom subagents for DeepSeek Harness: roles defined as Markdown files become per-role agent tools the primary model delegates to — on a pinned dsh model route or through an external CLI (cmdc, pi, agy, claude, dsh, vibe). Includes bin/dsh-roles.mjs to run any CLI-backed role headlessly from other harnesses.",
   "type": "module",
   "main": "lib/index.js",
+  "bin": {
+    "dsh-roles": "bin/dsh-roles.mjs"
+  },
   "exports": {
     ".": "./lib/index.js",
     "./definitions": "./lib/definitions.js",
@@ -14,6 +17,7 @@
     "./client": "./lib/client.js"
   },
   "files": [
+    "bin",
     "lib",
     "examples",
     "skills",
