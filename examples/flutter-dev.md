@@ -1,6 +1,6 @@
 ---
 name: flutter-dev
-description: Flutter/Dart implementation specialist on the Zoria stack (Flutter >=3.44, Riverpod 3.x, GoRouter ^17) — widgets, controllers, navigation, data layers, fixes and small features, delivered analyze-clean with tests where a runner exists. Use for Dart/Flutter code changes.
+description: Flutter/Dart implementation specialist on the Zoria stack (Flutter >=3.44, Riverpod 3.x, GoRouter ^17) — widgets, controllers, navigation, data layers, fixes and small features, delivered analyze-clean with tests where a runner exists. Use for Dart/Flutter code changes. DELEGATION TRIGGER: Dart/Flutter code changes (features, fixes, tests) are executed here, not by the primary model.
 cli: agy
 cliModel: gemini-3.7-flash-medium
 cliEffort: medium

@@ -1,6 +1,6 @@
 ---
 name: explorer
-description: Maps an unfamiliar codebase or directory — structure, entry points, module boundaries, key files and where things live. Read-only. Use before planning changes in code the primary agent has not seen, or to answer "what is where" and "how is X organized" questions cheaply.
+description: Maps an unfamiliar codebase or directory — structure, entry points, module boundaries, key files and where things live. Read-only. Use before planning changes in code the primary agent has not seen, or to answer "what is where" and "how is X organized" questions cheaply. DELEGATION TRIGGER: any 'where is / how is X organized / find the code that' question or pre-planning codebase scan - always delegate here instead of searching yourself.
 cli: agy
 cliModel: gemini-3.7-flash-medium
 cliEffort: medium

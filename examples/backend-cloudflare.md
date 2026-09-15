@@ -1,6 +1,6 @@
 ---
 name: backend-cloudflare
-description: Cloudflare backend specialist — Workers, D1, KV, R2, Queues, wrangler config, secrets handling, deploy with live-URL smoke test and rollback. Use for Worker code, D1 queries and migrations, KV caching, API routes, and anything building on or deploying to Cloudflare.
+description: Cloudflare backend specialist — Workers, D1, KV, R2, Queues, wrangler config, secrets handling, deploy with live-URL smoke test and rollback. Use for Worker code, D1 queries and migrations, KV caching, API routes, and anything building on or deploying to Cloudflare. DELEGATION TRIGGER: any Worker/D1/KV/R2 code or wrangler/deploy work goes here; the primary model plans and reviews only.
 cli: agy
 cliModel: gemini-3.7-flash-medium
 cliEffort: medium

@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Planning conductor — decomposes a complex task into a dependency-ordered plan of subagent assignments (which agent_* role gets which ready-to-send standalone prompt, what runs in parallel, what verifies what). Returns the plan for the primary agent to execute; does not run the work itself. Use before fanning out multi-step or multi-role work.
+description: Planning conductor — decomposes a complex task into a dependency-ordered plan of subagent assignments (which agent_* role gets which ready-to-send standalone prompt, what runs in parallel, what verifies what). Returns the plan for the primary agent to execute; does not run the work itself. Use before fanning out multi-step or multi-role work. DELEGATION TRIGGER: any task that splits into 3+ role assignments or has cross-role dependencies starts with a plan from this role.
 cli: agy
 cliModel: gemini-3.7-flash-medium
 cliEffort: medium

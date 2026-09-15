@@ -1,6 +1,6 @@
 ---
 name: general-purpose
-description: General-purpose worker for any self-contained task that does not need a named specialist — research, small code changes, file edits, scaffolding, quick fixes, docs, data transformations. Give it the full task context; it classifies, acts, verifies and reports.
+description: General-purpose worker for any self-contained task that does not need a named specialist — research, small code changes, file edits, scaffolding, quick fixes, docs, data transformations. Give it the full task context; it classifies, acts, verifies and reports. DELEGATION TRIGGER: drafts, data transformations, scaffolding, docs and small self-contained chores go here instead of burning primary-model context.
 cli: agy
 cliModel: gemini-3.7-flash-medium
 cliEffort: medium

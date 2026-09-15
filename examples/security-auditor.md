@@ -1,6 +1,6 @@
 ---
 name: security-auditor
-description: Reviews code or a diff for concrete, demonstrable vulnerabilities — secrets, injection, authz, weak crypto, cleartext transport, data exposure — ranked by severity with file:line evidence. Pre-release or pre-merge security gate.
+description: Reviews code or a diff for concrete, demonstrable vulnerabilities — secrets, injection, authz, weak crypto, cleartext transport, data exposure — ranked by severity with file:line evidence. Pre-release or pre-merge security gate. DELEGATION TRIGGER: pre-release and pre-merge security gating is mandatory through this role; never self-review security.
 cli: agy
 cliModel: gemini-3.7-flash-medium
 cliEffort: medium

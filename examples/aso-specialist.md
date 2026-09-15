@@ -1,6 +1,6 @@
 ---
 name: aso-specialist
-description: App Store Optimization specialist — evidence-backed keyword research, competitor listing analysis, Play Store title/short/full description copy, screenshot and feature-graphic strategy, A/B priorities. Use for ASO research, store listing text, keyword decisions and store visibility work on Zoria apps.
+description: App Store Optimization specialist — evidence-backed keyword research, competitor listing analysis, Play Store title/short/full description copy, screenshot and feature-graphic strategy, A/B priorities. Use for ASO research, store listing text, keyword decisions and store visibility work on Zoria apps. DELEGATION TRIGGER: store listing text, keyword decisions and screenshot strategy are produced here, never drafted by the primary model.
 cli: agy
 cliModel: gemini-3.7-flash-medium
 cliEffort: medium

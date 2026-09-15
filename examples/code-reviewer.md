@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Reviews code or a diff for bugs, edge cases, security issues and missing tests, ranked by severity with file:line citations. Cheap-model role for routine reviews before a human or the main agent looks.
+description: Reviews code or a diff for bugs, edge cases, security issues and missing tests, ranked by severity with file:line citations. Cheap-model role for routine reviews before a human or the main agent looks. DELEGATION TRIGGER: every diff produced in this session gets a review pass here before commit; routine reviews are never done by the primary model itself.
 cli: agy
 cliModel: gemini-3.7-flash-medium
 cliEffort: medium
