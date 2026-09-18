@@ -40,7 +40,7 @@ letting a role be a CLI instead of a dsh model.
 ---
 name: reviewer
 description: Reviews code or a diff for bugs, risks and missing tests.
-model: bai/glm-5.3-flash        # omit or "inherit" to follow the session's model
+model: hyper/glm-5.3-flash       # omit or "inherit" to follow the session's model
 tools: [bash, read, grep]       # optional exhaustive allow-list
 disallowedTools: [write]        # …or a deny-list
 color: "#d9480f"
@@ -111,7 +111,7 @@ session's skill catalog stays untouched:
 ---
 name: reviewer
 description: Reviews code or a diff for bugs, risks and missing tests.
-model: bai/glm-5.3-flash
+model: hyper/glm-5.3-flash
 skills: [subagent-ground-rules]
 ---
 You are a code review subagent…
