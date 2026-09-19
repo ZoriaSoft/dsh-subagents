@@ -7,6 +7,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Fixed
+- Tool filters of model-backed roles (`tools:` / `disallowedTools:`) are now
+  sanitized against the calling agent's scope (`sanitizeToolFilter` takes
+  `exec.agent` and both model run paths forward it) instead of the global
+  registry view — dsh 0.1.5-rc.1 registers native tools agent-scoped, so the
+  old `view(undefined)` lookup rejected valid role tool lists as "matches no
+  registered tool" and silently dropped deny lists. No-filter early return,
+  unknown-name warnings and the fail-closed empty-allow error are unchanged;
+  regression tests cover allow/deny × foreground/background × empty and
+  role-only global views.
 - `background:` pins on model-backed roles survive the manager round-trip:
   `serializeDefinition` emitted the key only inside the CLI branch, so
   editing a model role from the panel silently dropped the pin. `/save` now

@@ -1,7 +1,7 @@
 /** dsh-subagents — runner unit tests (argv map, sanitization, output shaping). */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCliArgv, isEffortUnsupportedError, messageText, parseRoute, personaText, sanitizeToolFilter, resolveRunMode, Semaphore } from '../lib/runner.js';
+import { buildCliArgv, isEffortUnsupportedError, messageText, parseRoute, personaText, sanitizeToolFilter, resolveRunMode, runModelForeground, runModelBackground, Semaphore } from '../lib/runner.js';
 
 test('cli argv uses verified headless flags', () => {
     assert.deepEqual(buildCliArgv('cmdc', 'p'), ['cmdc', '--no-session', '-p', 'p']);
@@ -148,9 +148,59 @@ test('empty allow-list after sanitization fails loudly', () => {
     assert.throws(() => sanitizeToolFilter(ctx, { name: 'r', tools: ['nope'] }), /matches no registered tool/);
 });
 
-test('no filter fields → undefined', () => {
-    const ctx = { tools: { view: () => ({ knownNames: [] }) }, logger: { warn: () => { } } };
-    assert.equal(sanitizeToolFilter(ctx, { name: 'r' }), undefined);
+test('no filter fields → undefined without consulting the registry', () => {
+    const ctx = { tools: { view: () => assert.fail('unfiltered roles must not query tools') } };
+    assert.equal(sanitizeToolFilter(ctx, { name: 'r' }, { id: 'caller' }), undefined);
+});
+
+// DSH 0.1.5-rc.1: native tools live in the caller's scope, not the global view.
+for (const globalNames of [[], ['agent_reviewer']]) {
+    const globalLabel = globalNames.length === 0 ? 'empty' : 'role-only';
+    for (const [mode, runModel] of [['foreground', runModelForeground], ['background', runModelBackground]]) {
+        for (const [field, key] of [['tools', 'allow'], ['disallowedTools', 'deny']]) {
+            test(`${mode} ${key} uses caller scope with ${globalLabel} global registry`, async () => {
+                const agent = { id: 'caller', name: 'caller-name' };
+                const scopes = [];
+                const warns = [];
+                let request;
+                const ctx = {
+                    tools: {
+                        view: (scope) => {
+                            scopes.push(scope);
+                            return { knownNames: scope === agent ? [...globalNames, 'read', 'bash'] : globalNames };
+                        },
+                    },
+                    logger: { warn: (message) => warns.push(message) },
+                    subagents: {
+                        start: async (_provider, options) => {
+                            request = options;
+                            return { id: 'run', result: Promise.resolve({ output: 'done' }), dispose: async () => {} };
+                        },
+                        startContinuable: async (options) => {
+                            request = options.request;
+                            return { childId: 'child' };
+                        },
+                    },
+                };
+                await runModel(ctx, { name: 'r', [field]: ['read', 'bash', 'unknown_tool'] }, 'task',
+                    { agent }, { provider: 'spawn', maxOutputChars: 100 });
+                assert.deepEqual(request.toolFilter, { [key]: ['read', 'bash'] });
+                assert.equal(scopes.length, 1);
+                assert.strictEqual(scopes[0], agent, 'view must receive the actual scope object, not its name or a copy');
+                assert.strictEqual(request.parent, agent);
+                assert.equal(warns.length, 1);
+                assert.match(warns[0], /unknown_tool/);
+            });
+        }
+    }
+}
+
+test('scoped sanitization rejects empty and entirely unknown allow-lists', () => {
+    const agent = { id: 'caller' };
+    const ctx = { tools: { view: (scope) => ({ knownNames: scope === agent ? ['read'] : [] }) } };
+    for (const tools of [[], ['unknown_tool']]) {
+        assert.throws(() => sanitizeToolFilter(ctx, { name: 'r', tools }, agent), /matches no registered tool/);
+    }
 });
 
 test('semaphore caps concurrency and releases in order', async () => {

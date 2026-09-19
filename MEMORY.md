@@ -9,5 +9,8 @@ ZCode tarzı özel subagent'lar (DeepSeek Harness / dsh). Roller Markdown dosyas
 - Node (package `dsh-subagents` v0.9.0) · CI badge: `ZoriaSoft/dsh-subagents`
 
 ## Notlar
+- Tool filtreleri (`tools:` / `disallowedTools:`) caller agent scope'u ile
+  sanitize edilir (`sanitizeToolFilter(ctx, def, exec.agent)`) — native tool'lar
+  agent-scoped'tır, global `view(undefined)` native adları bilmez (dsh 0.1.5-rc.1).
 - ZCode köprüsü: dsh dışı harness'lerde `node bin/dsh-roles.mjs run <rol> "<görev>" --cwd <dizin>`.
 - Kurallar kanonik: `zoria-dsh-roles` skill'i. Bu MEMORY.md otomatik şablondan.
