@@ -71,6 +71,29 @@ test('vibe has no effort flag to deliver', () => {
         ['vibe', '--auto-approve', '--output', 'text', '-p', 'p']);
 });
 
+test('devin base argv: dangerous mode + workspace-trust bypass, role embedded', () => {
+    assert.deepEqual(buildCliArgv('devin', 'task', 'role body', undefined, undefined),
+        ['devin', '--permission-mode', 'dangerous', '--respect-workspace-trust', 'false', '-p', '[Role instructions]\nrole body\n\n[Task]\ntask']);
+});
+
+test('devin model flag passes through after the base argv', () => {
+    assert.deepEqual(buildCliArgv('devin', 'task', undefined, 'opus', undefined),
+        ['devin', '--permission-mode', 'dangerous', '--respect-workspace-trust', 'false', '--model', 'opus', '-p', 'task']);
+});
+
+test('devin effort composes into the model id', () => {
+    // opus + high → opus-high (no --effort flag; devin 3000.10.31)
+    assert.deepEqual(buildCliArgv('devin', 'task', undefined, 'opus', 'high'),
+        ['devin', '--permission-mode', 'dangerous', '--respect-workspace-trust', 'false', '--model', 'opus-high', '-p', 'task']);
+    // already carrying the same level: used unchanged, no double suffix
+    assert.deepEqual(buildCliArgv('devin', 'task', undefined, 'opus-high', 'high'),
+        ['devin', '--permission-mode', 'dangerous', '--respect-workspace-trust', 'false', '--model', 'opus-high', '-p', 'task']);
+    // already carrying a different level: loud failure
+    assert.throws(() => buildCliArgv('devin', 'task', undefined, 'swe-2-high', 'low'), /already carries an effort level/);
+    // effort without a model cannot compose
+    assert.throws(() => buildCliArgv('devin', 'task', undefined, undefined, 'high'), /cliEffort requires cliModel/);
+});
+
 test('empty cliEffort adds no flag', () => {
     assert.deepEqual(buildCliArgv('agy', 'p', undefined, 'gemini-2.5-flash', ''),
         ['agy', '--disable-slash-commands', '--model', 'gemini-2.5-flash', '-p', 'p']);
@@ -109,7 +132,7 @@ test('unknown cli fails loudly', () => {
 
 test('prompt is a single argv element (no shell, no injection surface)', () => {
     const evil = 'x"; rm -rf /; echo "';
-    for (const cli of ['cmdc', 'pi', 'agy', 'claude', 'dsh', 'vibe']) {
+    for (const cli of ['cmdc', 'pi', 'agy', 'claude', 'dsh', 'vibe', 'devin']) {
         const argv = buildCliArgv(cli, evil, undefined);
         assert.equal(argv.filter((a) => a === evil).length, 1);
     }

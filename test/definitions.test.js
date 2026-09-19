@@ -104,6 +104,20 @@ test('cliEffort rides with cli and is ignored without it', () => {
     assert.ok(without.diagnostics.some((x) => x.includes('cliEffort')));
 });
 
+test('model-suffix effort diagnostics: devin leveled models are flagged, same-level and flag-effort CLIs are not', () => {
+    const leveled = parseDefinition('a.md', '---\nname: a\ndescription: d\ncli: devin\ncliModel: swe-2-high\ncliEffort: low\n---\nbody');
+    assert.ok(leveled.diagnostics.some((x) => x.includes('already carries an effort level')));
+    // same level already baked in: no conflict, no diagnostic
+    const same = parseDefinition('a.md', '---\nname: a\ndescription: d\ncli: devin\ncliModel: opus-high\ncliEffort: high\n---\nbody');
+    assert.ok(!same.diagnostics.some((x) => x.includes('already carries an effort level')));
+    // flag-effort CLIs legitimately pair a leveled model id with --effort
+    const flagCli = parseDefinition('a.md', '---\nname: a\ndescription: d\ncli: agy\ncliModel: gemini-3.8-flash-high\ncliEffort: medium\n---\nbody');
+    assert.ok(!flagCli.diagnostics.some((x) => x.includes('already carries an effort level')));
+    // model-suffix effort without a model cannot compose
+    const modelless = parseDefinition('a.md', '---\nname: a\ndescription: d\ncli: devin\ncliEffort: high\n---\nbody');
+    assert.ok(modelless.diagnostics.some((x) => x.includes('cliEffort requires cliModel')));
+});
+
 test('background parses as tri-state (true/false/undefined)', () => {
     const on = parseDefinition('a.md', '---\nname: a\ndescription: d\nbackground: true\n---\nbody');
     assert.equal(on.def.background, true);

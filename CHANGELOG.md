@@ -6,6 +6,30 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-09-19
+
+### Added
+- **devin CLI backend** (Cognition Devin): roles run headless via `devin -p`
+  with `--permission-mode dangerous` plus `--respect-workspace-trust false`
+  (print mode fails in an untrusted directory without the bypass, and a
+  headless role cannot answer permission prompts — the mode matches the local
+  devin-bridge default). devin has no system-prompt flag, so the role body is
+  embedded into the task prompt.
+- Live devin model catalog via `devin models list --format json` (the text
+  format hangs on a non-tty pipe): aliases and effort variants with cost
+  notes; the `fusion` family's ~150 composed pairings are skipped as picker
+  noise. New pure parser `parseDevinModels` with unit tests.
+- Effort selection for devin by composing the level into the model id
+  (`opus` + `high` → `--model opus-high`, verified against devin 3000.10.31 —
+  the CLI has no `--effort` flag). A model that already carries an effort
+  token is never suffixed twice; conflicting or model-less picks are rejected
+  by `buildCliArgv`, `/save` and definition diagnostics. New pure helper
+  `hasEffortToken`.
+- Optional `cliCwd` config for CLI-backed role spawns: an absolute path
+  handed to the CLI subprocess as its working directory (useful when the host
+  process cwd differs from the workspace — devin anchors its file tree and
+  `AGENTS.md` discovery to cwd).
+
 ### Fixed
 - Tool filters of model-backed roles (`tools:` / `disallowedTools:`) are now
   sanitized against the calling agent's scope (`sanitizeToolFilter` takes

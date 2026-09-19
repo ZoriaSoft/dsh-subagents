@@ -11,7 +11,7 @@ Each definition becomes a per-role agent tool (`agent_reviewer`, `agent_test_wri
 your primary model delegates to from any normal session. Roles run on their **own model
 route** (delegate the routine work to a cheap model while you keep the expensive one) or,
 as a dsh-subagents extension, through an **external CLI** (`cmdc`, `pi`, `agy`, `claude`,
-`dsh` headless).
+`dsh` headless, `vibe`, `devin`).
 
 ```
 you (expensive model) ── "have reviewer check this diff"
@@ -86,6 +86,11 @@ pick a model from the list, pick an effort, see them on the role badge.
 | `claude` | `claude -p <task>`                                         | `--model`     | `--effort`      | `--append-system-prompt`     |
 | `dsh`    | `dsh --profile headless <task>`                            | —             | —               | not deliverable (documented) |
 | `vibe`   | `vibe --auto-approve --output text [--agent <model>] -p <task>` | `--agent` | — | embedded role instructions; text output pinned — default mode blocks on a non-tty stdout pipe |
+| `devin`  | `devin --permission-mode dangerous --respect-workspace-trust false [--model <m>] -p <task>` | `--model` | model-suffix¹ | embedded role instructions |
+
+¹ devin's effort composes into the model id (`opus` + `high` → `--model opus-high`,
+verified against devin 3000.10.31 — the CLI has no `--effort` flag). The model list is
+live via `devin models list --format json`.
 
 CLI roles are always foreground and share a configurable concurrency cap
 (`maxConcurrentCli`, default 3). Each CLI must be on `PATH`. A role's `tools:`
@@ -164,7 +169,7 @@ starts with `_` is disabled.
 | `model`            | `provider/model`, or `inherit` / omitted to follow the calling session.     |
 | `cli`              | Run through an external CLI instead of a dsh model. Mutually exclusive with `model`. |
 | `cliModel`         | The CLI's own model id, passed via its `--model` flag. Requires `cli`. |
-| `cliEffort`        | Reasoning effort (`low` / `medium` / `high`, plus CLI-specific extras). Requires `cli`. |
+| `cliEffort`        | Reasoning effort (`low` / `medium` / `high`, plus CLI-specific extras). Requires `cli`. For devin it composes into the model id — requires `cliModel`. |
 | `background`       | Model-backed roles only: `true` / `false` pins the run mode. Default is background; the tool call's `run_in_background` argument overrides this key. CLI roles are always foreground. |
 | `tools`            | Exhaustive allow-list of tool names (omit for all). Unknown names are dropped with a warning; an allow-list matching nothing fails the call loudly. |
 | `disallowedTools`  | Deny-list of tool names.                                                    |
@@ -228,6 +233,7 @@ environment. Exit codes: `0` ok, `1` role/CLI failure, `2` usage error.
 | `maxOutputChars`   | `12000`            | Output cap returned to the calling agent.|
 | `maxConcurrentCli` | `3`                | Concurrent CLI-backed executions cap.    |
 | `rescanMs`         | `15000`            | Rescan interval (hot-reload safety net). |
+| `cliCwd`           | —                  | Optional absolute path; when set, CLI-backed roles spawn with that working directory — useful when the host process cwd differs from the workspace (e.g. devin anchors its file tree and `AGENTS.md` discovery to cwd). |
 
 ## Operations
 

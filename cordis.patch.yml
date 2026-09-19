@@ -11,6 +11,9 @@
         cliTimeoutMs: 300000
         maxOutputChars: 12000
         maxConcurrentCli: 3
+        # Working directory for CLI-backed roles (absolute path). Uncomment to
+        # anchor CLIs like devin to the workspace when the host process runs elsewhere.
+        # cliCwd: /absolute/path/to/workspace
         # Model-backed roles: tool-call timeout headroom.
         modelTimeoutMs: 600000
         # Self-heal rescan interval (also hot-reload safety net).
