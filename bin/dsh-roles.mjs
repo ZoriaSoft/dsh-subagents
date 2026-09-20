@@ -21,8 +21,7 @@
  *   --json            list: machine-readable output
  *
  * Model-backed roles (no `cli:`) need a live dsh session — this tool refuses
- * them. `dsh`-CLI roles additionally need the PIAI_* provider keys in the
- * environment (source the dsh-providers env file first).
+ * them.
  */
 import { realpathSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -192,8 +191,6 @@ async function main() {
         eff.cliModel = args.cliModel;
     if (args.cliEffort !== undefined)
         eff.cliEffort = args.cliEffort;
-    if (eff.cli === 'dsh' && !Object.keys(process.env).some((k) => k.startsWith('PIAI_')))
-        console.error('# hint: dsh role needs PIAI_* provider keys — source the dsh-providers env file first');
     if (args.cwd !== undefined)
         process.chdir(resolve(args.cwd));
     try {

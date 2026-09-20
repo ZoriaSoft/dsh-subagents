@@ -10,8 +10,7 @@ Define reusable roles — a reviewer, a test writer, a docs researcher — as Ma
 Each definition becomes a per-role agent tool (`agent_reviewer`, `agent_test_writer`, …)
 your primary model delegates to from any normal session. Roles run on their **own model
 route** (delegate the routine work to a cheap model while you keep the expensive one) or,
-as a dsh-subagents extension, through an **external CLI** (`cmdc`, `pi`, `agy`, `claude`,
-`dsh` headless, `vibe`, `devin`).
+as a dsh-subagents extension, through an **external CLI** (`agy`, `vibe`, `devin`).
 
 ```
 you (expensive model) ── "have reviewer check this diff"
@@ -76,15 +75,10 @@ delivered as the role's system prompt where the CLI supports one.
 A CLI role can pin the CLI's own model (`cliModel:`) and reasoning effort
 (`cliEffort:`). The manager editor loads both from the live CLI catalog —
 pick a model from the list, pick an effort, see them on the role badge.
-`dsh` headless is profile-bound and supports neither.
 
 | `cli:`   | headless invocation                                        | model flag    | effort flag     | definition body delivered as |
 |----------|------------------------------------------------------------|---------------|-----------------|------------------------------|
-| `cmdc`   | `cmdc --no-session -p <task>`                              | `--model`     | `--effort`      | embedded role instructions   |
-| `pi`     | `pi --no-session -p <task>`                                | `--model`     | `--thinking`    | `--append-system-prompt`     |
 | `agy`    | `agy --disable-slash-commands -p <task>`                   | `--model`     | `--effort`      | embedded role instructions   |
-| `claude` | `claude -p <task>`                                         | `--model`     | `--effort`      | `--append-system-prompt`     |
-| `dsh`    | `dsh --profile headless <task>`                            | —             | —               | not deliverable (documented) |
 | `vibe`   | `vibe --auto-approve --output text [--agent <model>] -p <task>` | `--agent` | — | embedded role instructions; text output pinned — default mode blocks on a non-tty stdout pipe |
 | `devin`  | `devin --permission-mode dangerous --respect-workspace-trust false [--model <m>] -p <task>` | `--model` | model-suffix¹ | embedded role instructions |
 
@@ -219,8 +213,7 @@ node bin/dsh-roles.mjs run code-reviewer "review the diff in lib/runner.js" \
 | `--skills-dir D` | Extra role-skill dir, repeatable.                      |
 
 Model-backed roles (no `cli:`) are refused — they need a live dsh session.
-`dsh`-CLI roles additionally need the `PIAI_*` provider keys in the
-environment. Exit codes: `0` ok, `1` role/CLI failure, `2` usage error.
+Exit codes: `0` ok, `1` role/CLI failure, `2` usage error.
 
 ## Configuration (`cordis.patch.yml`)
 

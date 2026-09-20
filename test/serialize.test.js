@@ -16,7 +16,7 @@ const DEFS = [
     {
         name: 'translator',
         description: 'Translates texts.\nSecond line of description.',
-        cli: 'cmdc',
+        cli: 'agy',
         cliModel: 'glm-5.3',
         cliEffort: 'high',
         body: 'Translate exactly.',
@@ -82,7 +82,7 @@ test('color is quoted so the # is preserved', () => {
 
 test('cliModel and cliEffort serialize next to cli', () => {
     const text = serializeDefinition(DEFS[1]);
-    assert.match(text, /^cli: cmdc$/m);
+    assert.match(text, /^cli: agy$/m);
     assert.match(text, /^cliModel: glm-5.3$/m);
     assert.match(text, /^cliEffort: high$/m);
 });

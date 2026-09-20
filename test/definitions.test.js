@@ -75,7 +75,7 @@ test('name and description are required', () => {
 });
 
 test('model and cli are mutually exclusive', () => {
-    const { def, diagnostics } = parseDefinition('a.md', '---\nname: a\ndescription: d\nmodel: bai/x\ncli: cmdc\n---\nbody');
+    const { def, diagnostics } = parseDefinition('a.md', '---\nname: a\ndescription: d\nmodel: bai/x\ncli: agy\n---\nbody');
     assert.equal(def, null);
     assert.ok(diagnostics.some((d) => d.includes('mutually exclusive')));
 });
@@ -97,7 +97,7 @@ test('cliModel rides with cli and is ignored without it', () => {
 });
 
 test('cliEffort rides with cli and is ignored without it', () => {
-    const withCli = parseDefinition('a.md', '---\nname: a\ndescription: d\ncli: cmdc\ncliEffort: high\n---\nbody');
+    const withCli = parseDefinition('a.md', '---\nname: a\ndescription: d\ncli: agy\ncliEffort: high\n---\nbody');
     assert.equal(withCli.def.cliEffort, 'high');
     const without = parseDefinition('a.md', '---\nname: a\ndescription: d\ncliEffort: high\n---\nbody');
     assert.equal(without.def.cliEffort, undefined);
@@ -149,10 +149,10 @@ test('loadDefinitions skips _disabled files and dedupes by name', async () => {
         await writeFile(join(dir, 'one.md'), FULL);
         await writeFile(join(dir, '_disabled.md'), FULL.replace('code-reviewer', 'disabled-role'));
         await writeFile(join(dir, 'two.md'), FULL.replace('code-reviewer', 'code-reviewer')); // same name
-        await writeFile(join(dir, 'three.md'), '---\nname: cli-role\ndescription: d\ncli: cmdc\n---\nbody');
+        await writeFile(join(dir, 'three.md'), '---\nname: cli-role\ndescription: d\ncli: agy\n---\nbody');
         const { agents, diagnostics } = await loadDefinitions(dir);
         assert.deepEqual(agents.map((a) => a.slug), ['code-reviewer', 'cli-role']);
-        assert.equal(agents[1].cli, 'cmdc');
+        assert.equal(agents[1].cli, 'agy');
         assert.ok(diagnostics.some((d) => d.includes('duplicate name')));
     }
     finally {
