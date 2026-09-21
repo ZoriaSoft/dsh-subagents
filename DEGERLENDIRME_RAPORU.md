@@ -1,53 +1,34 @@
 # Değerlendirme Raporu — dsh-subagents
 
-**Tarih:** 2026-09-20 · **Tür:** filo taraması (statik/metadata + koşulan deterministik kapılar; tam zoria-review değil)
-**Kapsam:** `/home/workspace/Projects/dsh-subagents` · **Stack:** Node
-**Commit:** `2026-09-20|b1925f2|fix(runners): cli listesi daraltıldı — cmdc/pi/claude/dsh kaldırıldı (agy/vibe/devin kaldı)` · branch `main` · dirty 0 · unpushed 0 · 30 commit
-**Remote:** `https://github.com/ZoriaSoft/dsh-subagents.git`
-**Koşulan kapılar:** security-audit
+**Tarih:** 2026-09-21 · **Tür:** tam zoria-review (bağımsız reviewer)
+**Kapsam:** `/home/workspace/Projects/dsh-subagents` — dsh web plugin + headless `dsh-roles` runner
+**Görsel kanıt:** N/A
 
 ## Özet
 
 | Kategori | Durum | Not |
 |---|---|---|
-| Yapı / Mimari | PASS | 3/8 kanonik doc; top dirs: .githooks, .github, bin, docs, examples, lib, scripts, skills |
-| Tasarım / UI | N/A | UI yüzeyi yok |
-| Güvenlik | PASS | 0 kaynak hit'i + 0 vendored/artefakt hit'i |
-| Güncellik | PASS | son commit: 2026-09-20 |
-| Test / CI | NOT_VERIFIED | 8 test dosyası · analyze: koşulmadı · workflow: 1 |
-| Git / hijyen | PASS | dirty 0 · unpushed 0 |
+| Yapı / Mimari | PASS | 8.5/10 — saf çekirdek/UI ayrımı, hot-reload reconciliation, canlı model kataloğu, anlamlı test disiplini |
+| Güvenlik | NEEDS_WORK | 7/10 — shell-less spawn + input regex iyi; puanı düşüren: route auth belirsizliği + process-tree kill eksikliği |
 
-**Genel durum: SAĞLIKLI** — indicative puan 9.0/10 (sinyal-bazlı; görsel/runtime kanıtlar kapsam dışı).
+**Verdict: Sağlam plugin; yayın öncesi iki doğrulama — dsh-web'in plugin-route auth sözleşmesi + timeout sonrası torun süreçler.**
 
-## Proje kimliği
+## Bağımsız reviewer bulguları
 
-dsh rol sistemi + dsh-roles.mjs headless kopru (fusion enforce).
+### MEDIUM
 
-**Güncel durum:** Bugunku commit b1925f2; tool-filter fix + 81 test gecmisti (09-19 MEMORY).
+- **[MED] Plugin route'larında auth kontrolü yok** (`lib/index.js`): `/save`, `/delete`, `/toggle`, `/debug`, `/catalog`, `/activity` güvenliği tamamen dsh-web'in plugin-route auth'ına emanet — framework garantisi statik doğrulanamadı. Açıksa: `/save` → keyfi `.md` rol dosyası (filename regex traversal'ı engelliyor) → sonraki turda `agent_*` tool → kalıcılık + prompt injection; `/debug` rol body'leri + mutlak path sızıntısı. → dsh-web auth'u doğrula; plugin'de kendi token/origin kontrolü.
+- **[MED] Timeout yalnız doğrudan child'ı öldürüyor** (`lib/runner.js`): `detached:false`, process-group kill yok → CLI child'ın torun süreçleri timeout sonrası yetim çalışmaya devam edebilir. → POSIX `detached:true` + `kill(-pid)` veya Windows `taskkill /T`.
 
-## Metrikler
+### LOW / INFO
 
-| Metrik | Değer |
-|---|---|
-| LOC (kod) | 3,609 — js:3,517, sh:92 |
-| Dosya | 48 · 0.3MB |
-| Test dosyası | 8 |
-| TODO/FIXME | 0 |
-| package.json | dsh-subagents 0.10.0 · scripts: test, smoke |
-| Dokümanlar | MEMORY.md, CHANGELOG.md, README.md |
-| docs/ | 1 dosya |
-| CI | ci.yml |
+- Kullanıcı skill dizini bundled'dan önce çözülüyor — `$DSH_HOME/subagent-skills/subagent-ground-rules.md` yazan herkes tüm rollerin sistem talimatını override eder (agentsDir'e yazan = tüm davranış → bilinçliyse dokümante et); `--cwd` keyfi `chdir` (çağırıcı zaten tam yetkili); CLI katalog 10dk cache + 20s timeout + 8MB cap sağlam; imza-bazlı reconcile saf/testli; unknown frontmatter sessizce yutulur (dokümante); README doğruluğu yüksek.
 
-## Bulgular
+## Öncelikli aksiyonlar
 
-- Belirgin bulgu yok (sinyal seviyesinde temiz).
+1. dsh-web plugin-route auth sözleşmesini doğrula (gerekirse plugin-içi kontrol)
+2. Timeout'ta process-tree kill
 
-## Öncelikli adımlar
+## Taranmadı
 
-1. Roster/model pinlerini MODEL_SCORECARD ile senkron tut.
-
-## Yöntem ve sınırlar
-
-- Bu rapor filo taramasıdır: manifest/git/doküman metrikleri + koşulan kapılar (security-audit). `flutter test`, `tsc`, `wrangler deploy --dry-run`, görsel/render ve bağımsız reviewer kapıları koşulmadı → ilgili kategoriler NOT_VERIFIED sayılır.
-- Security hit'leri statik regex tabanlıdır; vendored/build artefaktı ayrı işaretlendi, false-positive mümkündür — secret değerleri rapora kopyalanmaz (RL-SECRET).
-- Puan indicative'dir; merge/publish izni değildir. Tam değerlendirme için `zoria-review` akışı gerekir.
+- dsh runtime registration anchoring canlı davranışı, `client.js` kalan ~570 satır, `examples/` roster pin'leri teker teker
