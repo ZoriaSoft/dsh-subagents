@@ -1,9 +1,9 @@
 name: CI
 
+# RL-CI-MINUTES (zoria-workspace kök AGENTS.md, 2026-09-24): hesap GitHub
+# Free — yalnız elle tetiklenir. push/PR/schedule EKLEME. Asıl kapı yereldir.
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
