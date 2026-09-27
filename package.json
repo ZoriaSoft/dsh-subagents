@@ -1,7 +1,16 @@
 {
   "name": "dsh-subagents",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "ZCode-style custom subagents for DeepSeek Harness: roles defined as Markdown files become per-role agent tools the primary model delegates to — on a pinned dsh model route or through an external CLI (agy, vibe, devin). Includes bin/dsh-roles.mjs to run any CLI-backed role headlessly from other harnesses.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZoriaSoft/dsh-subagents.git"
+  },
+  "homepage": "https://github.com/ZoriaSoft/dsh-subagents#readme",
+  "bugs": {
+    "url": "https://github.com/ZoriaSoft/dsh-subagents/issues"
+  },
+  "author": "Zoriasoft",
   "type": "module",
   "main": "lib/index.js",
   "bin": {
@@ -49,6 +58,20 @@
         "@deepseek-ai/dsh-client-ui-layout"
       ],
       "platform": "web"
+    },
+    "compatibility": {
+      "node": ">=20",
+      "dshReleases": {
+        "0.1.5-rc.1": "compatible",
+        "0.1.5-rc.2": "compatible",
+        "0.1.5-rc.3": "unknown",
+        "0.1.6-alpha.1": "unknown",
+        "0.1.6-alpha.2": "unknown",
+        "0.1.7-alpha.1": "unknown",
+        "0.1.7-alpha.2": "unknown",
+        "0.1.7-rc.1": "unknown",
+        "0.1.7-rc.2": "unknown"
+      }
     }
   },
   "peerDependencies": {

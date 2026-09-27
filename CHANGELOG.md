@@ -6,6 +6,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.1] — 2026-09-27
+
+### Fixed
+- Manifest now points `repository` at the canonical GitHub URL
+  (plus `homepage`, `bugs` and `author`) — DSH STORE finding.
+- Per-version `dsh.compatibility.dshReleases` declarations: verified on
+  `0.1.5-rc.1`/`0.1.5-rc.2`, `unknown` for all newer releases.
+- README gains a permissions/dependencies/failure-bounds section; the
+  dead CI badge is removed.
+
+No runtime code changes.
+
 ## [0.10.0] — 2026-09-19
 
 ### Added

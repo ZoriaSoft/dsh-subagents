@@ -6,7 +6,7 @@
 ZCode tarzı özel subagent'lar (DeepSeek Harness / dsh). Roller Markdown dosyası olarak tanımlanır; birincil model bunlara per-rol tool olarak delege eder — pinned dsh model route üzerinden veya harici CLI ile (agy, vibe, devin). `bin/dsh-roles.mjs` herhangi bir CLI-backed rolü diğer harness'lerde headless çalıştırır.
 
 ## Stack
-- Node (package `dsh-subagents` v0.10.0) · CI badge: `ZoriaSoft/dsh-subagents`
+- Node (package `dsh-subagents` v0.10.1)
 
 ## Notlar
 - Tool filtreleri (`tools:` / `disallowedTools:`) caller agent scope'u ile
@@ -14,3 +14,4 @@ ZCode tarzı özel subagent'lar (DeepSeek Harness / dsh). Roller Markdown dosyas
   agent-scoped'tır, global `view(undefined)` native adları bilmez (dsh 0.1.5-rc.1).
 - ZCode köprüsü: dsh dışı harness'lerde `node bin/dsh-roles.mjs run <rol> "<görev>" --cwd <dizin>`.
 - Kurallar kanonik: `zoria-dsh-roles` skill'i. Bu MEMORY.md otomatik şablondan.
+- dsh 0.1.5-rc.2 API uyumu 2026-09-13 doğrulandı (ctx.subagents.start/startContinuable, subagent/end, provider 'spawn', defineTool, sidebar/shell slotları birebir; o anki 72/72 test yeşildi) — package.json `dshReleases` "0.1.5-rc.2": "compatible" değerinin in-repo kanıtı.

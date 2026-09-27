@@ -1,7 +1,5 @@
 # dsh-subagents
 
-![CI](https://github.com/ZoriaSoft/dsh-subagents/actions/workflows/ci.yml/badge.svg)
-
 ZCode-style custom subagents for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh).
 
 ![The Subagents manager — roles list and the New role editor with live CLI model and effort pickers](docs/panel.png)
@@ -289,6 +287,47 @@ changes need a `dsh-web` restart; definition-file changes do not.
   out of scope for now: dsh tools register globally, so a workspace-scoped role
   would either leak into other workspaces or need per-agent registration the
   current runtime does not expose. A future runtime API may unlock this safely.
+
+## Permissions, dependencies and failure bounds
+
+- **Files.** At runtime the host reads and watches role definition
+  directories (`$DSH_HOME/agents`, skills directories); edits hot-reload
+  into the next turn. The manager UI's save route writes role `.md` files
+  (a filename regex blocks path traversal). `scripts/install-roster.sh`
+  copies `examples/*.md` → `$DSH_HOME/agents` and
+  `skills/*/SKILL.md` → `$DSH_HOME/subagent-skills`, never overwriting
+  existing roles without `--force`.
+- **Network.** Six same-origin JSON plugin routes (the
+  activity/catalog/debug/save/delete/toggle family) fenced to loopback
+  plus the `trustedHosts` config / `DSH_TRUSTED_HOSTS` env knob, with a
+  1 MB JSON body cap. The plugin itself makes no outbound network calls
+  (role CLIs may use the network themselves — see below).
+- **Commands.** CLI-backed roles spawn external CLIs (`agy`, `vibe`,
+  `devin`) via `child_process.spawn` with process-tree kill (POSIX
+  detached + `kill(-pid)`, Windows `taskkill /T /F`), a semaphore of
+  max 3 concurrent spawns, and per-role timeouts (`cliTimeoutMs`
+  300000, `modelTimeoutMs` 600000 in `cordis.patch.yml`). The model
+  catalog refresh spawns CLIs with a 20 s timeout, an environment with pager and color output suppressed, and a 10-minute cache.
+- **Credentials.** None stored — no API keys, tokens, passwords or
+  keystores in this repo. Role CLIs use the invoker's own ambient
+  credentials (their CLIs, their accounts). The only credential-relevant env knob is
+  `DSH_TRUSTED_HOSTS` for the route fence.
+- **External services and dependencies.** Peer dependencies
+  `@deepseek-ai/cordis ^4.0.1`, `@deepseek-ai/dsh-llm` and
+  `@deepseek-ai/dsh-tools ^0.1.1-rc.2`; Node >=20. The external CLIs
+  (`agy`/`vibe`/`devin`) are optional and only needed for CLI-backed
+  roles. The client UI injects only the official
+  `@deepseek-ai/dsh-client-runtime` and
+  `@deepseek-ai/dsh-client-ui-layout` web platform packages.
+- **Failure bounds.** Unknown role frontmatter keys are ignored (reported through the
+  `/agents` slash command and the debug-route diagnostics).
+  Host-half (`lib/`) changes require a `dsh-web` restart (live sessions
+  drop); role-definition edits hot-reload. The self-heal rescan runs
+  every 15 s. Subprocess output is capped at 12000 chars. Honest
+  capability tier: **elevated** — roles can execute arbitrary CLIs as the
+  invoking user, so a store `blocked`/`user-reviewed` status may persist
+  even with these declarations; the declarations do not imply
+  auto-approval or a security audit.
 
 ## Development
 
