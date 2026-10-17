@@ -2,6 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseDefinition, serializeDefinition } from '../lib/definitions.js';
+import { sanitizeToolFilter } from '../lib/runner.js';
 
 const DEFS = [
     {
@@ -141,12 +142,15 @@ test('explicit empty tools list stays empty (never becomes filterless)', () => {
     assert.notEqual(back, null);
     assert.deepEqual(back.tools, []);
     assert.notEqual(back.tools, undefined);
+    const ctx = { tools: { view: () => ({ knownNames: new Set(['read', 'write', 'edit']) }) } };
+    assert.throws(() => sanitizeToolFilter(ctx, back, {}), /matches no registered tool/);
 });
 
 test('restricted role keeps its tool restrictions across an unrelated edit', () => {
     const original = {
         name: 'auditor',
         description: 'Audits code.',
+        model: 'bai/glm-5.3-flash',
         disallowedTools: ['write', 'edit'],
         tools: undefined,
         body: 'You are an auditor.',
@@ -163,14 +167,18 @@ test('restricted role keeps its tool restrictions across an unrelated edit', () 
     assert.equal(back.description, 'Audits code thoroughly.');
     assert.deepEqual(back.disallowedTools, ['write', 'edit']);
     assert.equal(back.tools, undefined);
+    const ctx = { tools: { view: () => ({ knownNames: new Set(['read', 'write', 'edit', 'grep']) }) } };
+    assert.deepEqual(sanitizeToolFilter(ctx, back, {}), { deny: ['write', 'edit'] });
 });
 
 test('allow-listed role keeps its tools across an unrelated edit', () => {
-    const original = { name: 'reader', description: 'Reads only.', tools: ['read', 'grep'], body: 'Read.' };
+    const original = { name: 'reader', description: 'Reads only.', model: 'bai/glm-5.3-flash', tools: ['read', 'grep'], body: 'Read.' };
     const { def: loaded } = parseDefinition('reader.md', serializeDefinition(original));
     assert.notEqual(loaded, null);
     const edited = { ...loaded, body: 'Read carefully.' };
     const { def: back } = parseDefinition('reader.md', serializeDefinition(edited));
     assert.notEqual(back, null);
     assert.deepEqual(back.tools, ['read', 'grep']);
+    const ctx = { tools: { view: () => ({ knownNames: new Set(['read', 'write', 'edit', 'grep']) }) } };
+    assert.deepEqual(sanitizeToolFilter(ctx, back, {}), { allow: ['read', 'grep'] });
 });
