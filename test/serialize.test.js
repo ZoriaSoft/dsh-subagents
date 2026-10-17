@@ -91,3 +91,86 @@ test('background serializes for model-backed roles too', () => {
     assert.match(serializeDefinition(DEFS[0]), /^background: false$/m);
     assert.match(serializeDefinition(DEFS[3]), /^background: true$/m);
 });
+
+test('description starting with [ is quoted and round-trips as a scalar', () => {
+    const def = { name: 'wip', description: '[WIP] review', body: 'Review it.' };
+    const text = serializeDefinition(def);
+    assert.match(text, /^description: "\[WIP\] review"$/m);
+    const { def: back, diagnostics } = parseDefinition('wip.md', text);
+    assert.notEqual(back, null, diagnostics.join('; '));
+    assert.equal(back.description, '[WIP] review');
+});
+
+test('hand-written quoted [WIP] description parses as scalar, not a list', () => {
+    const text = '---\nname: wip\ndescription: "[WIP] review"\n---\n\nBody.\n';
+    const { def, diagnostics } = parseDefinition('wip.md', text);
+    assert.notEqual(def, null, diagnostics.join('; '));
+    assert.equal(def.description, '[WIP] review');
+});
+
+test('description with quotes and colon round-trips', () => {
+    const descriptions = [
+        'He said "hi": review carefully',
+        "It's ready: check the 'final' pass",
+        'Review: "quoted" and: colon',
+    ];
+    for (const description of descriptions) {
+        const def = { name: 'quoted', description, body: 'Body.' };
+        const text = serializeDefinition(def);
+        const { def: back, diagnostics } = parseDefinition('quoted.md', text);
+        assert.notEqual(back, null, diagnostics.join('; '));
+        assert.equal(back.description, description);
+    }
+});
+
+test('multiline description with brackets, quotes and colons round-trips', () => {
+    const description = '[WIP] first: "draft"\nSecond line: still draft\nThird \'line\' here';
+    const def = { name: 'multi', description, body: 'Body.' };
+    const text = serializeDefinition(def);
+    assert.match(text, /^description: \|$/m);
+    const { def: back, diagnostics } = parseDefinition('multi.md', text);
+    assert.notEqual(back, null, diagnostics.join('; '));
+    assert.equal(back.description, description);
+});
+
+test('explicit empty tools list stays empty (never becomes filterless)', () => {
+    const def = { name: 'locked', description: 'No tools.', tools: [], body: 'Body.' };
+    const text = serializeDefinition(def);
+    assert.match(text, /^tools: \[\]$/m);
+    const { def: back } = parseDefinition('locked.md', text);
+    assert.notEqual(back, null);
+    assert.deepEqual(back.tools, []);
+    assert.notEqual(back.tools, undefined);
+});
+
+test('restricted role keeps its tool restrictions across an unrelated edit', () => {
+    const original = {
+        name: 'auditor',
+        description: 'Audits code.',
+        disallowedTools: ['write', 'edit'],
+        tools: undefined,
+        body: 'You are an auditor.',
+    };
+    const first = serializeDefinition(original);
+    const { def: loaded } = parseDefinition('auditor.md', first);
+    assert.notEqual(loaded, null);
+    // Simulate an editor save that only touches description/body but
+    // carries the loaded restrictions back (client load → show → send).
+    const edited = { ...loaded, description: 'Audits code thoroughly.', body: 'You are a thorough auditor.' };
+    const second = serializeDefinition(edited);
+    const { def: back } = parseDefinition('auditor.md', second);
+    assert.notEqual(back, null);
+    assert.equal(back.description, 'Audits code thoroughly.');
+    assert.deepEqual(back.disallowedTools, ['write', 'edit']);
+    assert.equal(back.tools, undefined);
+});
+
+test('allow-listed role keeps its tools across an unrelated edit', () => {
+    const original = { name: 'reader', description: 'Reads only.', tools: ['read', 'grep'], body: 'Read.' };
+    const { def: loaded } = parseDefinition('reader.md', serializeDefinition(original));
+    assert.notEqual(loaded, null);
+    const edited = { ...loaded, body: 'Read carefully.' };
+    const { def: back } = parseDefinition('reader.md', serializeDefinition(edited));
+    assert.notEqual(back, null);
+    assert.deepEqual(back.tools, ['read', 'grep']);
+});
