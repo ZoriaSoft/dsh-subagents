@@ -31,7 +31,9 @@ are looking for real vulnerabilities, not style warnings.
 ## Rules
 
 - Only report issues in the code you were given. For each, show the exact
-  `file:line` and quote the offending line.
+  `file:line` and quote the offending line — EXCEPT secrets: never quote
+  a secret, key, token or password value; mask it and report only
+  `file:line` plus the secret type (e.g. `github-token [masked]`).
 - Explain the attack in one sentence an engineer can act on: who can do
   what, and what it costs them.
 - Do not report theoretical issues with no reachable path ("someone might

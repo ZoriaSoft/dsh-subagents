@@ -16,14 +16,52 @@ done
   exit 1
 }
 
-# 2) Staged içerikte bilinen token kalıpları
+# 2) Staged içerikte bilinen token kalıpları.
+# Eşleşme içeriği ASLA basılmaz — yalnız dosya:satır ve kural adı yazılır;
+# korumanın kendisi sırrı terminale/loga sızdırmamalı.
 PATTERNS='ghp_[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9]{20,}|AIza[A-Za-z0-9_-]{30,}|xox[bp]-[A-Za-z0-9-]{10,}'
-HITS="$(git diff --cached -U0 --no-color | grep -E '^\+' | grep -oE "$PATTERNS" | sort -u)"
-[ -n "$HITS" ] && {
+DIFF_TMP="$(mktemp)"
+HITS_TMP="$(mktemp)"
+trap 'rm -f "$DIFF_TMP" "$HITS_TMP"' 0 INT TERM
+git diff --cached -U0 --no-color > "$DIFF_TMP"
+CUR_FILE=""
+NEW_LINE=0
+while IFS= read -r line; do
+  case "$line" in
+    '+++ b/'*) CUR_FILE="$(printf '%s' "$line" | sed 's|^+++ b/||')" ;;
+    '+++ '*) CUR_FILE="$(printf '%s' "$line" | sed 's|^+++ ||')" ;;
+    '@@ '*)
+      NEW_LINE="$(printf '%s' "$line" | sed -n 's/^@@ -[^ ]* +\([0-9][0-9]*\).*/\1/p')"
+      [ -n "$NEW_LINE" ] || NEW_LINE=0
+      ;;
+    '+'*)
+      case "$line" in
+        '+++'*) ;;
+        *)
+          if printf '%s' "$line" | grep -qE "$PATTERNS"; then
+            RULE="secret-pattern"
+            if printf '%s' "$line" | grep -qE 'ghp_[A-Za-z0-9]{20,}'; then RULE="github-token"
+            elif printf '%s' "$line" | grep -qE 'gho_[A-Za-z0-9]{20,}'; then RULE="github-oauth-token"
+            elif printf '%s' "$line" | grep -qE 'github_pat_[A-Za-z0-9_]{20,}'; then RULE="github-pat"
+            elif printf '%s' "$line" | grep -qE 'sk-[A-Za-z0-9]{20,}'; then RULE="api-key"
+            elif printf '%s' "$line" | grep -qE 'AIza[A-Za-z0-9_-]{30,}'; then RULE="google-api-key"
+            elif printf '%s' "$line" | grep -qE 'xox[bp]-[A-Za-z0-9-]{10,}'; then RULE="slack-token"
+            fi
+            printf '%s:%s rule=%s\n' "$CUR_FILE" "$NEW_LINE" "$RULE" >> "$HITS_TMP"
+          fi
+          NEW_LINE=$((NEW_LINE + 1))
+          ;;
+      esac
+      ;;
+    '-'*) ;;
+    ' '*) NEW_LINE=$((NEW_LINE + 1)) ;;
+  esac
+done < "$DIFF_TMP"
+if [ -s "$HITS_TMP" ]; then
   echo "❌ SECRET-GUARD: staged içerikte token/anahtar kalıbı bulundu:"
-  echo "$HITS" | sed 's/^/   /'
+  sed 's/^/   /' "$HITS_TMP"
   echo "   Kalıbı koddan çıkar (env/değişken kullan). Detay: AGENTS.md Kırmızı Çizgi #1"
   exit 1
-}
+fi
 
 exit 0
